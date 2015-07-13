@@ -27,6 +27,26 @@ def publish():
 
 
 @fab.task
+def deploy():
+    branch = fab.local('git rev-parse --abbrev-ref HEAD', capture=True)
+
+    if branch == "develop":
+        fab.local("env/bin/python setup.py sdist")
+        tar_filename = "{}.tar.gz".format(
+            fab.local(
+                "env/bin/python setup.py --fullname", capture=True
+            )
+        )
+        dist_filename = "dist/{}".format(tar_filename)
+        dest_filename = "/tmp/{}".format(tar_filename)
+        fab.put(dist_filename, dest_filename)
+
+        fab.env.user = USER
+        with fab.cd(DEPLOY_DIR):
+            fab.run("env/bin/pip install {}".format(dest_filename))
+
+
+@fab.task
 def bootstrap():
     """
     Bootstrap environment
