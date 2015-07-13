@@ -1,0 +1,14 @@
+# Remove all old entries first
+:foreach i in=[/ip firewall address-list find ] do={
+  :if ( [/ip firewall address-list get $i comment] = "{{ comment }}") do={
+      /ip firewall address-list remove $i
+  }
+}
+
+# Now let's add the new ones
+/ip firewall address-list
+
+{%- for ip in ips %}
+add address="{{ ip }}" list="{{ listname }}" comment="{{ comment }}"
+{%- endfor %}
+
