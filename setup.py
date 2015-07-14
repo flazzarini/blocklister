@@ -19,6 +19,9 @@ setup(
     include_package_data=True,
     install_requires=[
         "flask",
+        "flask-limiter",
+        "limits",
+        "six",
     ],
     entry_points={
         'console_scripts': []
