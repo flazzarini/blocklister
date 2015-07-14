@@ -1,5 +1,5 @@
-Welcome to Blocklister
-----------------------
+Welcome to Blocklister v{{ version }}
+---------------------------
 
 Blocklister offers different ip blocklists rendered as Mikrotik Router OS
 address lists. The lists are updated once every 3 days. Available Lists are
@@ -9,7 +9,7 @@ the following:
     * {{ list|attr("__name__") }} - {{ list|attr("source") }}
 {%- endfor %}
 
-Please note that each ip is limited to 20 requests per day.
+Please note that each ip is limited to 10 requests per day.
 
 To use these lists on your routers all you need to do is create one of the
 following scripts and define a scheduler when the lists should get downloaded
