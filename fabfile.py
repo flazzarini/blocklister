@@ -43,6 +43,7 @@ def deploy():
 
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
+            fab.run("env/bin/pip uninstall -y {}".format(PACKAGE_NAME))
             fab.run("env/bin/pip install {}".format(dest_filename))
 
 
@@ -219,6 +220,7 @@ def apache_template(app, path, user, servername=None):
         '    CustomLog {path}/log/access.log combined\n'
         '    ErrorLog  {path}/log/error.log\n'
         '</VirtualHost>\n'
+
     )
     if not servername:
         servername = fab.prompt(
