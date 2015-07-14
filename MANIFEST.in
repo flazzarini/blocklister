@@ -1,0 +1,2 @@
+include blocklister/version.txt
+include blocklister/templates/*.jinja2
