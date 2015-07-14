@@ -5,7 +5,7 @@ from flask.ext.limiter import Limiter
 from blocklister.models import BlackList
 
 app = Flask(__name__)
-limiter = Limiter(app)
+limiter = Limiter(app, headers_enabled=True)
 store = "/tmp"
 
 
