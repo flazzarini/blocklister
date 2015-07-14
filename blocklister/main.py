@@ -1,9 +1,11 @@
 from datetime import datetime
 
 from flask import Flask, request, render_template, make_response
+from flask.ext.limiter import Limiter
 from blocklister.models import BlackList
 
 app = Flask(__name__)
+limiter = Limiter(app)
 store = "/tmp"
 
 
@@ -45,6 +47,14 @@ def handle_unknown_blacklist(exc):
     return response
 
 
+@app.errorhandler(429)
+def handle_ratelimit(exc):
+    msg = "Too Many Request from your ip"
+    response = make_response(msg, 429)
+    response.headers['Content-Type'] = "text/plain"
+    return response
+
+
 @app.route("/", methods=['GET'])
 def index():
     lists = BlackList.__subclasses__()
@@ -54,6 +64,7 @@ def index():
     return response
 
 
+@limiter.limit("10 per day")
 @app.route("/<string:blacklist>", methods=['GET'])
 def get_list(blacklist):
     # First find the right class
