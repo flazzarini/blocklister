@@ -1,16 +1,52 @@
-Welcome to Blocklister v{{ version }}
----------------------------
-
-Blocklister offers different ip blocklists rendered as Mikrotik Router OS
-address lists. The lists are updated once every 3 days. Available Lists are
-the following:
+Welcome to Blocklister
+----------------------
+Blocklister generates MikroTik Router OS compatible address-lists from commonly
+known Internet Blocklists such as iblocklist (https://www.iblocklist.com) and
+DShield (http://feeds.dshield.org/block.txt). The lists are updated once every
+3 days. The following lists are available:
 
 {% for list in lists %}
-    * {{ list|attr("__name__") }} - {{ list|attr("source") }}
+    * {{ list|attr("__name__") }} - http://blocklister.gefoo.org/{{ list|attr("__name__")|lower }}
 {%- endfor %}
+
+The resulting script will first remove all ip addresses matching a specific
+comment by default the name of the list and later add the entire list again.
+The addresslist name and comment can be customized by query parameters which
+are explained in the following paragraph.
 
 Please note that each ip is limited to 10 requests per day.
 
-To use these lists on your routers all you need to do is create one of the
-following scripts and define a scheduler when the lists should get downloaded
-and imported.
+Query Parameters
+-----------------
+
+With these query parameters you can customized the name and comment which will
+be used to create the address-list on your router.
+
+name               The name of the resulting addresslist
+comment            Use this query parameter to adjust the comment which will be
+                   used for this addresslist (Please make sure that this comment
+                   is unique among your addresslists)
+
+
+Example with curl
+-----------------
+
+curl https://blocklister.gefoo.org/ads?name=Blocklist?comment=ads
+
+
+Example with RouterOS
+---------------------
+
+To use this service automatically you can add the following script on your
+router. Of course you will need to create a scheduler to execute this script
+automatically.
+
+
+/system script \
+  add name="Blocklister_download_Ads" source="\
+  /tool fetch url=\"https://blocklister.gefoo.org/ads\" dst-path=\"ads.rsc\";\
+  /import file-name=\"ads.rsc\";"
+
+
+{{ "---"|center }}
+{{ "Blocklister v%s"|format(version)|center }}

@@ -82,7 +82,7 @@ class BlackList(object):
 
                     ip = "{}-{}".format(from_ip, to_ip)
                     results.append(ip)
-        return results
+        return list(set(results))
 
 
 class Ads(BlackList):
