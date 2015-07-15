@@ -45,14 +45,15 @@ def deploy():
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
             fab.run("env/bin/pip uninstall -y {}".format(PACKAGE_NAME))
-            fab.run("env/bin/pip install {}".format(dest_filename))
+            fab.run("env/bin/pip install --upgrade {}".format(dest_filename))
 
     else:
         fab.execute("publish")
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
             fab.run(
-                "env/bin/pip install -f {} {}".format(PYREPO_URL, PACKAGE_NAME)
+                "env/bin/pip install --upgrade -f {} {}"
+                .format(PYREPO_URL, PACKAGE_NAME)
             )
 
 
