@@ -6,7 +6,7 @@ DShield (http://feeds.dshield.org/block.txt). The lists are updated once every
 3 days. The following lists are available:
 
 {% for list in lists %}
-    * {{ list|attr("__name__") }} - http://blocklister.gefoo.org/{{ list|attr("__name__")|lower }}
+    * {{ list|attr("__name__") }} - https://blocklister.gefoo.org/{{ list|attr("__name__")|lower }}
 {%- endfor %}
 
 The resulting script will first remove all ip addresses matching a specific
