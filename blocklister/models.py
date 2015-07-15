@@ -22,21 +22,20 @@ class BlackList(object):
 
     def __init__(self, store):
         self.store = store
-        self.filename = join(
-            self.store,
-            self.__class__.__name__.lower() + ".txt"
-        )
+        self.name = self.__class__.__name__.lower()
+        self.filename = join(self.store, self.name + '.txt')
 
     @property
     def file_exists(self):
-        LOG.debug("Does {} already exist".format(self.filename))
         if exists(self.filename):
+            LOG.debug("File {} exists".format(self.filename))
             return True
-        return False
+        else:
+            LOG.debug("File {} does not exists".format(self.filename))
+            return False
 
     @property
     def last_saved(self):
-        LOG.debug("Get creation time for file {}".format(self.filename))
         if exists(self.filename):
             file_date = datetime.fromtimestamp(getmtime(self.filename))
             LOG.debug("File has a timestamp of {}".format(file_date))
@@ -74,11 +73,6 @@ class BlackList(object):
                 if res:
                     from_ip = res.groups(0)[0]
                     to_ip = res.groups(0)[1]
-
-                    # Convert to CIDR Notation
-                    # TODO leave this out as it is killing the CPU
-                    #ilist = list(iter_iprange(from_ip, to_ip))
-                    #ip = str(ilist.pop())
 
                     ip = "{}-{}".format(from_ip, to_ip)
                     results.append(ip)
