@@ -4,6 +4,8 @@ from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
 from blocklister import __version__
 from blocklister.models import BlackList
+from blocklister.cache import cached
+
 
 app = Flask(__name__)
 limiter = Limiter(app, headers_enabled=True)
@@ -69,6 +71,7 @@ def index():
 
 @limiter.limit("10 per day")
 @app.route("/<string:blacklist>", methods=['GET'])
+@cached()
 def get_list(blacklist):
     # First find the right class
     _class = get_class(blacklist.title())
