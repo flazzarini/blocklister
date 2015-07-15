@@ -52,7 +52,8 @@ def deploy():
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
             fab.run(
-                "env/bin/pip install --upgrade -f {} {}".format(PYREPO_URL, PACKAGE_NAME)
+                "env/bin/pip install --upgrade -f {} {}"
+                .format(PYREPO_URL, PACKAGE_NAME)
             )
 
 
