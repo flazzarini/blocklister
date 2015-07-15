@@ -44,7 +44,7 @@ def handle_unknown_blacklist(exc):
         exc=exc,
     )
     response = make_response(msg, 404)
-    response.headers['Content-Type'] = "plain/text"
+    response.headers['Content-Type'] = "text/plain"
     return response
 
 
@@ -63,7 +63,7 @@ def index():
         "welcome.jinja2", lists=lists, version=__version__
     )
     response = make_response(result, 200)
-    response.headers['Content-Type'] = "plain/text"
+    response.headers['Content-Type'] = "text/plain"
     return response
 
 
@@ -101,7 +101,7 @@ def get_list(blacklist):
         comment=comment
     )
     response = make_response(result, 200)
-    response.headers['Content-Type'] = "plain/text"
+    response.headers['Content-Type'] = "text/plain"
     return response
 
 
