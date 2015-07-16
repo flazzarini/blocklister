@@ -1,0 +1,53 @@
+1.3
+---
+
+* Simplified get_ips method
+* Added OpenBL and Spamhaus lists
+
+1.2
+---
+
+* Added changelog
+
+
+1.1
+---
+
+* Added Cache for list routes
+
+
+1.0.5
+-----
+
+* Content-Type should be text/plain
+
+
+1.0.4
+-----
+
+* Fabric install task should always try a pip --upgrade
+
+
+1.0.3
+-----
+
+* Malwaredomainlist was not working, different regex
+
+
+1.0.2
+-----
+
+* Error in curl example on welcome page
+
+
+1.0.1
+-----
+
+* New Welcome page
+* Remove duplicate ip entries
+
+
+1.0
+---
+
+* First production ready version
