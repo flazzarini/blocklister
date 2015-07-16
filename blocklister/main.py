@@ -6,6 +6,7 @@ from blocklister import __version__
 from blocklister.models import BlackList
 from blocklister.helpers import get_changelog
 from blocklister.cache import cached
+from blocklister.exc import DownloadError
 
 
 app = Flask(__name__)
@@ -47,6 +48,14 @@ def handle_unknown_blacklist(exc):
         exc=exc,
     )
     response = make_response(msg, 404)
+    response.headers['Content-Type'] = "text/plain"
+    return response
+
+
+@app.errorhandler(DownloadError)
+def handle_downloaderror(exc):
+    msg = "Error downloading requested list"
+    response = make_response(msg, 500)
     response.headers['Content-Type'] = "text/plain"
     return response
 
