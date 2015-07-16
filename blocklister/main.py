@@ -6,7 +6,7 @@ from blocklister import __version__
 from blocklister.models import BlackList
 from blocklister.helpers import get_changelog
 from blocklister.cache import cached
-from blocklister.exc import DownloadError
+from blocklister.exc import DownloadError, EmptyListError
 
 
 app = Flask(__name__)
@@ -48,6 +48,13 @@ def handle_unknown_blacklist(exc):
         exc=exc,
     )
     response = make_response(msg, 404)
+    response.headers['Content-Type'] = "text/plain"
+    return response
+
+
+@app.errorhandler(EmptyListError)
+def handle_empty_ip_list(exc):
+    response = make_response(str(exc), 404)
     response.headers['Content-Type'] = "text/plain"
     return response
 
@@ -115,6 +122,12 @@ def get_list(blacklist):
         bl.get()
 
     ips = bl.get_ips()
+
+    if not ips:
+        raise EmptyListError(
+            "No ips found for {}".format(blacklist.title())
+        )
+
     result = render_template(
         "mikrotik_addresslist.jinja2",
         ips=ips,
