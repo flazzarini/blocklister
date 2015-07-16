@@ -4,6 +4,7 @@ from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
 from blocklister import __version__
 from blocklister.models import BlackList
+from blocklister.helpers import get_changelog
 from blocklister.cache import cached
 
 
@@ -64,6 +65,14 @@ def index():
     result = render_template(
         "welcome.jinja2", lists=lists, version=__version__
     )
+    response = make_response(result, 200)
+    response.headers['Content-Type'] = "text/plain"
+    return response
+
+
+@app.route("/changelog", methods=['GET'])
+def changelog():
+    result = get_changelog()
     response = make_response(result, 200)
     response.headers['Content-Type'] = "text/plain"
     return response
