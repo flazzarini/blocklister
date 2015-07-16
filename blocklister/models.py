@@ -71,10 +71,19 @@ class BlackList(object):
                 res = re.search(self.regex, line)
 
                 if res:
-                    from_ip = res.groups(0)[0]
-                    to_ip = res.groups(0)[1]
+                    if len(res.groups(0)) > 1:
+                        from_ip = res.groups(0)[0]
+                        to_ip = res.groups(0)[1]
+                    else:
+                        from_ip = res.groups(0)[0]
+                        to_ip = res.groups(0)[0]
 
-                    ip = "{}-{}".format(from_ip, to_ip)
+                    # If this is a cidr notation return a simple cidr entry
+                    if not "/" in from_ip:
+                        ip = "{}-{}".format(from_ip, to_ip)
+                    else:
+                        ip = "{}".format(from_ip)
+
                     results.append(ip)
         return list(set(results))
 
@@ -144,3 +153,30 @@ class Malwaredomainlist(BlackList):
                     ip = "{}-{}".format(from_ip, to_ip)
                     results.append(ip)
         return list(set(results))
+
+
+class Openbl(BlackList):
+    source = "https://www.openbl.org/lists/base.txt.gz"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
+
+
+class Openbl_180(BlackList):
+    source = "https://www.openbl.org/lists/base_180days.txt.gz"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
+
+
+class Openbl_360(BlackList):
+    source = "https://www.openbl.org/lists/base_360days.txt.gz"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
+
+
+class Spamhausdrop(BlackList):
+    source = "https://www.spamhaus.org/drop/drop.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
+    nogzip = True
+
+
+class Spamhausedrop(BlackList):
+    source = "https://www.spamhaus.org/drop/edrop.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
+    nogzip = True
