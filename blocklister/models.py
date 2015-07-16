@@ -141,19 +141,6 @@ class Malwaredomainlist(BlackList):
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
     nogzip = True
 
-    def get_ips(self):
-        results = []
-        with open(self.filename, 'r') as f:
-            for line in f:
-                res = re.search(self.regex, line)
-
-                if res:
-                    from_ip = res.groups(0)[0]
-                    to_ip = from_ip
-                    ip = "{}-{}".format(from_ip, to_ip)
-                    results.append(ip)
-        return list(set(results))
-
 
 class Openbl(BlackList):
     source = "https://www.openbl.org/lists/base.txt.gz"
