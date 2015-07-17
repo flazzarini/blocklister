@@ -13,11 +13,15 @@ class cached(object):
 
     def __call__(self, f):
         def decorator(*args, **kwargs):
-            response = cache.get(request.path)
+            path = request.path
+            qargs = str(hash(frozenset(request.args.items())))
+            keyname = "{}_{}".format(path, qargs)
+
+            response = cache.get(keyname)
             if response is None:
                 LOG.debug("Put response onto cache")
                 response = f(*args, **kwargs)
-                cache.set(request.path, response, self.timeout)
+                cache.set(keyname, response, self.timeout)
             else:
                 LOG.debug("Got response from cache")
             return response
