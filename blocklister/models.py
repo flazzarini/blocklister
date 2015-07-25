@@ -11,7 +11,7 @@ from blocklister.exc import DownloadError
 LOG = logging.getLogger(__name__)
 
 
-class BlackList(object):
+class Blocklist(object):
     source = "http://bogus.site.com"
     regex = (
         "^.*:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})-"
@@ -88,82 +88,82 @@ class BlackList(object):
         return list(set(results))
 
 
-class Ads(BlackList):
+class Ads(Blocklist):
     source = "http://list.iblocklist.com/?list=bt_ads"
 
 
-class Spyware(BlackList):
+class Spyware(Blocklist):
     source = "http://list.iblocklist.com/?list=bt_spyware"
 
 
-class Level1(BlackList):
+class Level1(Blocklist):
     source = "http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw"
 
 
-class Level2(BlackList):
+class Level2(Blocklist):
     source = "http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw"
 
 
-class Level3(BlackList):
+class Level3(Blocklist):
     source = "http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh"
 
 
-class Edu(BlackList):
+class Edu(Blocklist):
     source = "http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh"
 
 
-class Proxy(BlackList):
+class Proxy(Blocklist):
     source = "http://list.iblocklist.com/?list=xoebmbyexwuiogmbyprb"
 
 
-class Badpeers(BlackList):
+class Badpeers(Blocklist):
     source = "http://list.iblocklist.com/?list=cwworuawihqvocglcoss"
 
 
-class Microsoft(BlackList):
+class Microsoft(Blocklist):
     source = "http://list.iblocklist.com/?list=xshktygkujudfnjfioro"
 
 
-class Spider(BlackList):
+class Spider(Blocklist):
     source = "http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy"
 
 
-class Hijacked(BlackList):
+class Hijacked(Blocklist):
     source = "http://list.iblocklist.com/?list=usrcshglbiilevmyfhse"
 
 
-class Dshield(BlackList):
+class Dshield(Blocklist):
     source = "http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv"
 
 
-class Malwaredomainlist(BlackList):
+class Malwaredomainlist(Blocklist):
     source = "http://www.malwaredomainlist.com/hostslist/ip.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
     nogzip = True
 
 
-class Openbl(BlackList):
+class Openbl(Blocklist):
     source = "https://www.openbl.org/lists/base.txt.gz"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
 
 
-class Openbl_180(BlackList):
+class Openbl_180(Blocklist):
     source = "https://www.openbl.org/lists/base_180days.txt.gz"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
 
 
-class Openbl_360(BlackList):
+class Openbl_360(Blocklist):
     source = "https://www.openbl.org/lists/base_360days.txt.gz"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
 
 
-class Spamhausdrop(BlackList):
+class Spamhausdrop(Blocklist):
     source = "https://www.spamhaus.org/drop/drop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
     nogzip = True
 
 
-class Spamhausedrop(BlackList):
+class Spamhausedrop(Blocklist):
     source = "https://www.spamhaus.org/drop/edrop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
     nogzip = True

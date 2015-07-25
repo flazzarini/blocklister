@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
 from blocklister import __version__
-from blocklister.models import BlackList
+from blocklister.models import Blocklist
 from blocklister.helpers import get_changelog
 from blocklister.cache import cached
 from blocklister.exc import DownloadError, EmptyListError
@@ -16,14 +16,14 @@ store = "/tmp"
 
 def get_class(classname):
     """
-    Run through all subclassess of `BlackList` and return the
+    Run through all subclassess of `Blocklist` and return the
     appropiate class, if None was found raise a `ValueError`
 
     :param classname: str Classname to look up
     :rtype `class`
     :returns Class for which we were looking for
     """
-    for subcls in BlackList.__subclasses__():
+    for subcls in Blocklist.__subclasses__():
         if subcls.__name__ == classname.title():
             return subcls
     raise ValueError("No class found for {}".format(classname))
@@ -40,7 +40,7 @@ def handle_filenotavailable(exc):
 @app.errorhandler(ValueError)
 def handle_unknown_blacklist(exc):
     routes = [
-        "/{}".format(x.__name__.lower()) for x in BlackList.__subclasses__()
+        "/{}".format(x.__name__.lower()) for x in Blocklist.__subclasses__()
     ]
     msg = render_template(
         'unknown_blacklist.jinja2',
@@ -77,7 +77,7 @@ def handle_ratelimit(exc):
 
 @app.route("/", methods=['GET'])
 def index():
-    lists = BlackList.__subclasses__()
+    lists = Blocklist.__subclasses__()
     result = render_template(
         "welcome.jinja2", lists=lists, version=__version__
     )
