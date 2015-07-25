@@ -167,3 +167,45 @@ class Spamhausedrop(Blocklist):
     source = "https://www.spamhaus.org/drop/edrop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
     nogzip = True
+
+
+class Blocklistde_All(Blocklist):
+    source = "http://lists.blocklist.de/lists/all.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
+
+
+class Blocklistde_Ssh(Blocklist):
+    source = "http://lists.blocklist.de/lists/ssh.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
+
+
+class Blocklistde_Mail(Blocklist):
+    source = "http://lists.blocklist.de/lists/mail.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
+
+
+class Blocklistde_Imap(Blocklist):
+    source = "http://lists.blocklist.de/lists/imap.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
+
+
+class Blocklistde_Apache(Blocklist):
+    source = "http://lists.blocklist.de/lists/apache.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
+
+
+class Blocklistde_Ftp(Blocklist):
+    source = "http://lists.blocklist.de/lists/ftp.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
+
+
+class Blocklistde_Strongips(Blocklist):
+    source = "http://lists.blocklist.de/lists/strongips.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    nogzip = True
