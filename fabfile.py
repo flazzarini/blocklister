@@ -20,6 +20,7 @@ fab.env.roledefs = {
 def develop():
     fab.local("env/bin/python setup.py develop")
     fab.local("env/bin/pip install pytest")
+    fab.local("env/bin/pip install pytest-xdist")
 
 
 @fab.roles('pyrepo')
