@@ -16,6 +16,12 @@ fab.env.roledefs = {
 }
 
 
+@fab.task
+def develop():
+    fab.local("env/bin/python setup.py develop")
+    fab.local("env/bin/pip install pytest")
+
+
 @fab.roles('pyrepo')
 @fab.task
 def publish():
@@ -68,7 +74,7 @@ def bootstrap():
         'libapache2-mod-wsgi',
         'curl',
         'gzip',
-        'python-setuptools'
+        'python-setuptools',
     ]
     fab.sudo("aptitude install -q -y {0}".format(" ".join(deps)))
     fab.sudo("easy_install virtualenv")
