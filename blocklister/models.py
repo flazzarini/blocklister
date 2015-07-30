@@ -20,24 +20,32 @@ class Blocklist(object):
     template = "firewall_addresslist.jinja2"
     nogzip = False
 
-    def __init__(self, store):
-        self.store = store
+    def __init__(self, store, filename=None):
         self.name = self.__class__.__name__.lower()
-        self.filename = join(self.store, self.name + '.txt')
+        self.store = store
+        self.filename = filename if filename else join(self.name + '.txt')
+        self.filepath = join(self.store, self.filename)
+
+    def __repr__(self):
+        return (
+            "{0}({1}, filename={2})".format(
+                self.__class__.__name__, self.store, self.filename
+            )
+        )
 
     @property
     def file_exists(self):
-        if exists(self.filename):
-            LOG.debug("File {} exists".format(self.filename))
+        if exists(self.filepath):
+            LOG.debug("File {} exists".format(self.filepath))
             return True
         else:
-            LOG.debug("File {} does not exists".format(self.filename))
+            LOG.debug("File {} does not exists".format(self.filepath))
             return False
 
     @property
     def last_saved(self):
-        if exists(self.filename):
-            file_date = datetime.fromtimestamp(getmtime(self.filename))
+        if exists(self.filepath):
+            file_date = datetime.fromtimestamp(getmtime(self.filepath))
             LOG.debug("File has a timestamp of {}".format(file_date))
             return file_date
         raise IOError("File not found")
@@ -50,15 +58,15 @@ class Blocklist(object):
             if self.nogzip:
                 cmd = (
                     "wget -O - {} > {}"
-                    .format(self.source, self.filename)
+                    .format(self.source, self.filepath)
                 )
             else:
                 cmd = (
                     "wget -O - {} | gunzip > {}"
-                    .format(self.source, self.filename)
+                    .format(self.source, self.filepath)
                 )
             check_call(cmd, shell=True, stdout=devnull, stderr=STDOUT)
-            LOG.info("List has been saved to {}".format(self.filename))
+            LOG.info("List has been saved to {}".format(self.filepath))
         except CalledProcessError as exc:
             raise DownloadError(exc)
         finally:
@@ -66,25 +74,23 @@ class Blocklist(object):
 
     def get_ips(self):
         results = []
-        with open(self.filename, 'r') as f:
+        with open(self.filepath, 'r') as f:
             for line in f:
+                print(line)
                 res = re.search(self.regex, line)
+                print(res)
 
-                if res:
-                    if len(res.groups(0)) > 1:
-                        from_ip = res.groups(0)[0]
-                        to_ip = res.groups(0)[1]
+                if not res:
+                    continue
+
+                entry = ""
+                for el in res.groups():
+                    if not entry:
+                        entry = "{}".format(el)
                     else:
-                        from_ip = res.groups(0)[0]
-                        to_ip = res.groups(0)[0]
+                        entry = "{}-{}".format(entry, el)
 
-                    # If this is a cidr notation return a simple cidr entry
-                    if not "/" in from_ip:
-                        ip = "{}-{}".format(from_ip, to_ip)
-                    else:
-                        ip = "{}".format(from_ip)
-
-                    results.append(ip)
+                results.append(entry)
         return list(set(results))
 
 
