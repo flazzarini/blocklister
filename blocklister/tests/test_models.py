@@ -1,5 +1,9 @@
 import unittest
+from unittest.mock import patch, MagicMock
+
 import os
+from io import StringIO, BytesIO
+from gzip import compress
 from tempfile import NamedTemporaryFile
 from textwrap import dedent
 
@@ -87,10 +91,55 @@ class TestBlocklist(TestBlocklistBase):
         with self.assertRaises(IOError):
             bl.last_saved
 
-    @unittest.skip("Use urlib in this method instead of curl")
-    def test_get(self):
-        # not really testable, this method should use urlib instead of curl
-        pass
+    @patch('blocklister.models.urlopen')
+    def test_get(self, urlopen_mock):
+        # Prepare mocked content
+        content = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        content_fileobj = StringIO(content)
+
+        # Prepare our request mock
+        request_mock = MagicMock()
+        urlopen_mock.return_value = content_fileobj
+
+        # Get Result from get method
+        result = self.bl.get(request=request_mock)
+
+        # Read actual content in file created on disk
+        self.tempfile.file.seek(0)
+        file_content = self.tempfile.file.read().decode('utf-8')
+
+        self.assertEqual(result, file_content)
+
+    @patch('blocklister.models.urlopen')
+    def test_get_gzip(self, urlopen_mock):
+        # Prepare mocked content
+        content = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        content_gzip = compress(content.encode('utf-8'))
+        content_bytesio = BytesIO(content_gzip)
+
+        # Prepare our request mock
+        request_mock = MagicMock()
+        urlopen_mock.return_value = content_bytesio
+
+        # Get Result from get method
+        self.bl.gzip = True
+        result = self.bl.get(request=request_mock)
+
+        # Read actual content in file created on disk
+        self.tempfile.file.seek(0)
+        file_content = self.tempfile.file.read().decode('utf-8')
+
+        self.assertEqual(result, file_content)
 
     def test_get_ips_simple(self):
         contents = dedent(
