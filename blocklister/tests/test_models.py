@@ -66,6 +66,21 @@ class TestBlocklist(TestBlocklistBase):
         )
         self.assertEqual(self.bl.__repr__(), expected)
 
+    def get_class(self):
+        store = MagicMock()
+        classes = []
+        for subcls in Blocklist.__subclasses__():
+            classes.append(subcls)
+
+        for klass in classes:
+            result = Blocklist.get_class(klass.__name__, store)
+            self.assertEqual(result.__class__, klass)
+
+    def get_class_raises(self):
+        store = MagicMock()
+        with self.assertRaises(ValueError):
+            Blocklist.get_class('nonexisting', store)
+
     def test_file_exists(self):
         result = self.bl.file_exists
         self.assertTrue(result)
@@ -155,10 +170,7 @@ class TestBlocklist(TestBlocklistBase):
             '3.3.3.3-3.3.3.3'
         ]
         result = self.bl.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestAds(TestBlocklistBase):
@@ -176,14 +188,11 @@ class TestAds(TestBlocklistBase):
         self.tempfile.file.write(contents.encode('utf-8'))
         self.tempfile.file.flush()
         expected = [
-            '2.2.2.0-2.2.2.255',
             '1.1.1.1-1.1.1.1',
+            '2.2.2.0-2.2.2.255',
         ]
         result = self.ads.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestSpyware(TestBlocklistBase):
@@ -205,10 +214,7 @@ class TestSpyware(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.spyware.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestLevel1(TestBlocklistBase):
@@ -230,10 +236,7 @@ class TestLevel1(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.level1.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestLevel2(TestBlocklistBase):
@@ -255,10 +258,7 @@ class TestLevel2(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.level2.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestLevel3(TestBlocklistBase):
@@ -280,10 +280,7 @@ class TestLevel3(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.level3.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestEdu(TestBlocklistBase):
@@ -305,10 +302,7 @@ class TestEdu(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.edu.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestProxy(TestBlocklistBase):
@@ -330,10 +324,7 @@ class TestProxy(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.proxy.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBadpeers(TestBlocklistBase):
@@ -355,10 +346,7 @@ class TestBadpeers(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.badpeers.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestMicrosoft(TestBlocklistBase):
@@ -380,10 +368,7 @@ class TestMicrosoft(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.microsoft.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestHijacked(TestBlocklistBase):
@@ -405,10 +390,7 @@ class TestHijacked(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.hijacked.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestSpider(TestBlocklistBase):
@@ -430,10 +412,7 @@ class TestSpider(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.spider.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestDshield(TestBlocklistBase):
@@ -455,10 +434,7 @@ class TestDshield(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.dshield.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestMalwaredomainlist(TestBlocklistBase):
@@ -480,10 +456,7 @@ class TestMalwaredomainlist(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.ml.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestOpenbl(TestBlocklistBase):
@@ -505,10 +478,7 @@ class TestOpenbl(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.openbl.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestOpenbl_180(TestBlocklistBase):
@@ -530,10 +500,7 @@ class TestOpenbl_180(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.openbl.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestOpenbl_360(TestBlocklistBase):
@@ -555,10 +522,7 @@ class TestOpenbl_360(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.openbl.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestSpamhausdrop(TestBlocklistBase):
@@ -580,10 +544,7 @@ class TestSpamhausdrop(TestBlocklistBase):
             '2.2.2.2/32',
         ]
         result = self.spamhaus.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestSpamhausedrop(TestBlocklistBase):
@@ -605,10 +566,7 @@ class TestSpamhausedrop(TestBlocklistBase):
             '2.2.2.2/32',
         ]
         result = self.spamhaus.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_All(TestBlocklistBase):
@@ -630,10 +588,7 @@ class TestBlocklistde_All(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_Ssh(TestBlocklistBase):
@@ -655,10 +610,7 @@ class TestBlocklistde_Ssh(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_Mail(TestBlocklistBase):
@@ -680,10 +632,7 @@ class TestBlocklistde_Mail(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_Imap(TestBlocklistBase):
@@ -705,10 +654,7 @@ class TestBlocklistde_Imap(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_Apache(TestBlocklistBase):
@@ -730,10 +676,7 @@ class TestBlocklistde_Apache(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_Ftp(TestBlocklistBase):
@@ -755,10 +698,7 @@ class TestBlocklistde_Ftp(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
 
 
 class TestBlocklistde_Strongips(TestBlocklistBase):
@@ -780,7 +720,4 @@ class TestBlocklistde_Strongips(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
-        self.assertListEqual(
-            sorted(result),
-            sorted(expected)
-        )
+        self.assertCountEqual(result, expected)
