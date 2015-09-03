@@ -5,7 +5,6 @@ from flask.ext.limiter import Limiter
 from blocklister import __version__
 from blocklister.models import Blocklist
 from blocklister.helpers import get_changelog
-from blocklister.cache import cached
 from blocklister.exc import DownloadError, EmptyListError
 
 
@@ -81,30 +80,25 @@ def changelog():
 
 @limiter.limit("10 per day")
 @app.route("/<string:blacklist>", methods=['GET'])
-@cached()
 def get_list(blacklist):
     # First find the right class
-    _class = get_class(blacklist.title())
-    bl = _class(store)
+    bl = Blocklist.get_class(blacklist)
 
     # Get File if it does not exist yet
-    if not bl.file_exists:
-        bl.get()
+    if not bl.file_exists: bl.get()
+
+    # Check if file is older than 3 days, if so update
+    if (datetime.now() - bl.last_saved).days > 3: bl.get()
 
     # Get User variables if any
     listname = request.args.get(
         "listname",
-        "{}_list".format(_class.__name__.lower())
+        "{}_list".format(bl.__class__.__name__.lower())
     )
     comment = request.args.get(
         "comment",
-        "{}".format(_class.__name__.title())
+        "{}".format(bl.__class__.__name__.title())
     )
-
-    # Check if file is older than 3 days, if so update
-    now = datetime.now()
-    if (now - bl.last_saved).days > 3:
-        bl.get()
 
     ips = bl.get_ips()
 
