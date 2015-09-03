@@ -105,6 +105,22 @@ class Blocklist(object):
                 results.append(entry)
         return list(set(results))
 
+    @classmethod
+    def get_class(cls, name, store):
+        """
+        Run through all subclassess of `Blocklist` and return the
+        appropiate class, if None was found raise a `ValueError`
+
+        :param name: str Classname to look up
+        :param store: str which storage to use
+        :rtype instance
+        :returns Class instance for which we were looking for
+        """
+        for subcls in cls.__subclasses__():
+            if subcls.__name__ == name.title():
+                return subcls(store)
+        raise ValueError("No class found for {}".format(name))
+
 
 class Ads(Blocklist):
     source = "http://list.iblocklist.com/?list=bt_ads"
