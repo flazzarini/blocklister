@@ -14,21 +14,6 @@ limiter = Limiter(app, headers_enabled=True)
 store = "/tmp"
 
 
-def get_class(classname):
-    """
-    Run through all subclassess of `Blocklist` and return the
-    appropiate class, if None was found raise a `ValueError`
-
-    :param classname: str Classname to look up
-    :rtype `class`
-    :returns Class for which we were looking for
-    """
-    for subcls in Blocklist.__subclasses__():
-        if subcls.__name__ == classname.title():
-            return subcls
-    raise ValueError("No class found for {}".format(classname))
-
-
 @app.errorhandler(IOError)
 def handle_filenotavailable(exc):
     msg = "File on disk is not available"
