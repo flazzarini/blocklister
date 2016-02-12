@@ -58,8 +58,7 @@ class Blocklist(object):
         try:
             LOG.info(
                 "Downloading new version of list from {}"
-                .format(self.source)
-            )
+                .format(self.source))
             if not request:
                 request = self.request
 
@@ -70,14 +69,14 @@ class Blocklist(object):
                     LOG.debug("Source file is gziped, unpack file first")
                     buf = BytesIO(raw_content)
                     data = GzipFile(fileobj=buf)
-                    raw_content = data.read().decode('utf-8')
+                    raw_content = data.read().decode('ascii', 'ignore')
                     data.close()
                     buf.close()
 
                 destination_file = join(self.store, self.filename)
 
                 with open(destination_file, 'w') as fileobj:
-                    fileobj.write(raw_content)
+                    fileobj.write(raw_content.decode('ascii', 'ignore'))
                     LOG.debug("File written to {}".format(destination_file))
 
                 return raw_content
