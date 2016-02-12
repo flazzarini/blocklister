@@ -84,13 +84,15 @@ def changelog():
 @app.route("/<string:blacklist>", methods=['GET'])
 def get_list(blacklist):
     # First find the right class
-    bl = Blocklist.get_class(blacklist)
+    bl = Blocklist.get_class(blacklist, store)
 
     # Get File if it does not exist yet
-    if not bl.file_exists: bl.get()
+    if not bl.file_exists:
+        bl.get()
 
     # Check if file is older than 3 days, if so update
-    if (datetime.now() - bl.last_saved).days > 3: bl.get()
+    if (datetime.now() - bl.last_saved).days > 3:
+        bl.get()
 
     # Get User variables if any
     listname = request.args.get(
