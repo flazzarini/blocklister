@@ -2,9 +2,8 @@ from datetime import datetime
 
 from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
-from blocklister import __version__
+from blocklister import __version__, __changelog__
 from blocklister.models import Blocklist
-from blocklister.helpers import get_changelog
 from blocklister.exc import DownloadError, EmptyListError
 
 
@@ -65,7 +64,7 @@ def index():
     result = render_template(
         "welcome.jinja2",
         lists=lists,
-        version=__version__.decode('utf-8')
+        version=__version__
     )
     response = make_response(result, 200)
     response.headers['Content-Type'] = "text/plain"
@@ -74,8 +73,7 @@ def index():
 
 @app.route("/changelog", methods=['GET'])
 def changelog():
-    result = get_changelog()
-    response = make_response(result, 200)
+    response = make_response(__changelog__, 200)
     response.headers['Content-Type'] = "text/plain"
     return response
 

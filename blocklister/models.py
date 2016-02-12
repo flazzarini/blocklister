@@ -1,7 +1,8 @@
 import logging
 import re
+from urllib.request import urlretrieve
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+#from urllib.request import Request, urlopen
 from gzip import GzipFile
 from io import BytesIO
 from os.path import join
@@ -23,12 +24,12 @@ class Blocklist(object):
     template = "firewall_addresslist.jinja2"
     gzip = False
 
-    def __init__(self, store, filename=None):
+    def __init__(self, store, filename=None, request=urlretrieve):
         self.name = self.__class__.__name__.lower()
         self.store = store
         self.filename = filename if filename else join(self.name + '.txt')
         self.filepath = join(self.store, self.filename)
-        self.request = Request(self.source)
+        self.request = request
 
     def __repr__(self):
         return (
@@ -62,24 +63,23 @@ class Blocklist(object):
             if not request:
                 request = self.request
 
-            with urlopen(request) as response:
-                raw_content = response.read()
+            raw_content = request(self.source)
 
-                if self.gzip:
-                    LOG.debug("Source file is gziped, unpack file first")
-                    buf = BytesIO(raw_content)
-                    data = GzipFile(fileobj=buf)
-                    raw_content = data.read().decode('ascii', 'ignore')
-                    data.close()
-                    buf.close()
+            if self.gzip:
+                LOG.debug("Source file is gziped, unpack file first")
+                buf = BytesIO(raw_content)
+                data = GzipFile(fileobj=buf)
+                raw_content = data.read()
+                data.close()
+                buf.close()
 
-                destination_file = join(self.store, self.filename)
+            destination_file = join(self.store, self.filename)
 
-                with open(destination_file, 'w') as fileobj:
-                    fileobj.write(raw_content.decode('ascii', 'ignore'))
-                    LOG.debug("File written to {}".format(destination_file))
+            with open(destination_file, 'w') as fileobj:
+                fileobj.write(raw_content.decode('ascii', 'ignore'))
+                LOG.debug("File written to {}".format(destination_file))
 
-                return raw_content
+            return raw_content.decode('ascii')
         except (HTTPError, URLError) as exc:
             raise DownloadError("Could not download source {}".format(exc))
         except IOError as exc:

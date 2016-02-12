@@ -106,8 +106,7 @@ class TestBlocklist(TestBlocklistBase):
         with self.assertRaises(IOError):
             bl.last_saved
 
-    @patch('blocklister.models.urlopen')
-    def test_get(self, urlopen_mock):
+    def test_get(self):
         # Prepare mocked content
         content = dedent(
             """
@@ -115,11 +114,11 @@ class TestBlocklist(TestBlocklistBase):
             2.2.2.2
             """
         )
-        content_fileobj = StringIO(content)
+        content_fileobj = bytes(content.encode('ascii'))
 
         # Prepare our request mock
         request_mock = MagicMock()
-        urlopen_mock.return_value = content_fileobj
+        request_mock.return_value = content_fileobj
 
         # Get Result from get method
         result = self.bl.get(request=request_mock)
@@ -130,8 +129,7 @@ class TestBlocklist(TestBlocklistBase):
 
         self.assertEqual(result, file_content)
 
-    @patch('blocklister.models.urlopen')
-    def test_get_gzip(self, urlopen_mock):
+    def test_get_gzip(self):
         # Prepare mocked content
         content = dedent(
             """
@@ -140,11 +138,11 @@ class TestBlocklist(TestBlocklistBase):
             """
         )
         content_gzip = compress(content.encode('utf-8'))
-        content_bytesio = BytesIO(content_gzip)
+        content_fileobj = bytes(content_gzip)
 
         # Prepare our request mock
         request_mock = MagicMock()
-        urlopen_mock.return_value = content_bytesio
+        request_mock.return_value = content_fileobj
 
         # Get Result from get method
         self.bl.gzip = True
