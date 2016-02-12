@@ -63,7 +63,9 @@ def handle_ratelimit(exc):
 def index():
     lists = Blocklist.__subclasses__()
     result = render_template(
-        "welcome.jinja2", lists=lists, version=__version__
+        "welcome.jinja2",
+        lists=lists,
+        version=__version__.decode('utf-8')
     )
     response = make_response(result, 200)
     response.headers['Content-Type'] = "text/plain"
