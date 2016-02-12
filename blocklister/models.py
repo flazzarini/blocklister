@@ -2,7 +2,6 @@ import logging
 import re
 from urllib.request import urlretrieve
 from urllib.error import HTTPError, URLError
-#from urllib.request import Request, urlopen
 from gzip import GzipFile
 from io import BytesIO
 from os.path import join
