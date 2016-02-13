@@ -18,9 +18,16 @@ fab.env.roledefs = {
 
 @fab.task
 def develop():
+    if not path.exists("env"):
+        fab.local("virtualenv -p /usr/bin/python3 env")
     fab.local("env/bin/python setup.py develop")
     fab.local("env/bin/pip install pytest")
     fab.local("env/bin/pip install pytest-xdist")
+
+
+@fab.task
+def test():
+    fab.local("env/bin/py.test -f --color yes blocklister")
 
 
 @fab.roles('pyrepo')
