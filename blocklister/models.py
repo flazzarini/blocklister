@@ -18,24 +18,30 @@ class Blocklist(object):
     source = "http://bogus.site.com"
     regex = (
         "^.*:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})-"
-        "(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
-    )
+        "(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
     template = "firewall_addresslist.jinja2"
     gzip = False
 
     def __init__(self, store, filename=None, request=urlretrieve):
         self.name = self.__class__.__name__.lower()
         self.store = store
-        self.filename = filename if filename else join(self.name + '.txt')
-        self.filepath = join(self.store, self.filename)
+        self.filename = filename
         self.request = request
+
+    @property
+    def filepath(self):
+        """
+        Compiles the absolute filepath to the local data source for this List
+        """
+        _filename = self.filename
+        if not _filename:
+            _filename = self.name + '.txt'
+        return join(self.store, _filename)
 
     def __repr__(self):
         return (
             "{0}({1}, filename={2})".format(
-                self.__class__.__name__, self.store, self.filename
-            )
-        )
+                self.__class__.__name__, self.store, self.filename))
 
     @property
     def file_exists(self):
@@ -72,7 +78,7 @@ class Blocklist(object):
                 data.close()
                 buf.close()
 
-            destination_file = join(self.store, self.filename)
+            destination_file = self.filepath
 
             with open(destination_file, 'w') as fileobj:
                 fileobj.write(raw_content.decode('ascii', 'ignore'))
