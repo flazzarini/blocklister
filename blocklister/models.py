@@ -1,14 +1,8 @@
 import logging
 import re
 from urllib.request import urlretrieve
-from urllib.error import HTTPError, URLError
-from gzip import GzipFile
-from io import BytesIO
 from os.path import join
-from datetime import datetime
-from os.path import getmtime, exists
-
-from blocklister.exc import DownloadError
+from blocklister.fetcher import Fetcher
 
 
 LOG = logging.getLogger(__name__)
@@ -27,6 +21,12 @@ class Blocklist(object):
         self.store = store
         self.filename = filename
         self.request = request
+        self.fetcher = Fetcher(self.source, self.filepath)
+
+    def __repr__(self):
+        return (
+            "{0}({1}, filename={2})".format(
+                self.__class__.__name__, self.store, self.filename))
 
     @property
     def filepath(self):
@@ -38,59 +38,10 @@ class Blocklist(object):
             _filename = self.name + '.txt'
         return join(self.store, _filename)
 
-    def __repr__(self):
-        return (
-            "{0}({1}, filename={2})".format(
-                self.__class__.__name__, self.store, self.filename))
-
-    @property
-    def file_exists(self):
-        if exists(self.filepath):
-            LOG.debug("File {} exists".format(self.filepath))
-            return True
-        else:
-            LOG.debug("File {} does not exists".format(self.filepath))
-            return False
-
-    @property
-    def last_saved(self):
-        if exists(self.filepath):
-            file_date = datetime.fromtimestamp(getmtime(self.filepath))
-            LOG.debug("File has a timestamp of {}".format(file_date))
-            return file_date
-        raise IOError("File not found")
-
-    def get(self, request=None):
-        try:
-            LOG.info(
-                "Downloading new version of list from {}"
-                .format(self.source))
-            if not request:
-                request = self.request
-
-            raw_content = request(self.source)
-
-            if self.gzip:
-                LOG.debug("Source file is gziped, unpack file first")
-                buf = BytesIO(raw_content)
-                data = GzipFile(fileobj=buf)
-                raw_content = data.read()
-                data.close()
-                buf.close()
-
-            destination_file = self.filepath
-
-            with open(destination_file, 'w') as fileobj:
-                fileobj.write(raw_content.decode('ascii', 'ignore'))
-                LOG.debug("File written to {}".format(destination_file))
-
-            return raw_content.decode('ascii')
-        except (HTTPError, URLError) as exc:
-            raise DownloadError("Could not download source {}".format(exc))
-        except IOError as exc:
-            raise DownloadError("Could not write file to disk {}".format(exc))
-
     def get_ips(self):
+        if not self.fetcher.file_exists:
+            self.fetcher.update()
+
         results = []
         with open(self.filepath, 'r') as f:
             for line in f:
