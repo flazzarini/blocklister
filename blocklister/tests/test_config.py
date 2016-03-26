@@ -1,14 +1,26 @@
 import unittest
 from unittest.mock import patch
+from textwrap import dedent
 
 from tempfile import NamedTemporaryFile
 from blocklister.config import Config, ConfigError
 
 
-class TestConfigloader(unittest.TestCase):
+class TestConfig(unittest.TestCase):
     def setUp(self):
         self.tmp = NamedTemporaryFile(delete=True)
-        self.content = "[testing]\noption = value\n"
+        self.content = dedent(
+            """
+            [testing]
+            list = item1
+                item2
+                item3
+            list_single = item1
+            foo = 1
+            bar = foo
+            enabled = True
+            disabled = False
+            """)
         self.f = open(self.tmp.name, "w")
         self.f.write(self.content)
         self.f.close()
@@ -35,8 +47,8 @@ class TestConfigloader(unittest.TestCase):
         """
         test_get getting the testing option from temp ini file
         """
-        result = self.config.get('testing', 'option')
-        expected = 'value'
+        result = self.config.get('testing', 'bar')
+        expected = 'foo'
         self.assertEqual(result, expected)
 
     def test_get_default(self):
@@ -46,6 +58,31 @@ class TestConfigloader(unittest.TestCase):
         result = self.config.get('testing', 'notfound', default='amp')
         expected = 'amp'
         self.assertEqual(result, expected)
+
+    def test_get_list(self):
+        result = self.config.get_list('testing', 'list')
+        expected = ['item1', 'item2', 'item3']
+        self.assertCountEqual(result, expected)
+
+    def test_get_list_single_item(self):
+        result = self.config.get_list('testing', 'list_single')
+        expected = ['item1']
+        self.assertCountEqual(result, expected)
+
+    def test_get_list_default(self):
+        result = self.config.get_list(
+            'testing', 'listNotFound', default=['1', '2'])
+        expected = ['1', '2']
+        self.assertCountEqual(result, expected)
+
+    def test_get_int(self):
+        result = self.config.get_int('testing', 'foo')
+        expected = 1
+        self.assertEqual(result, expected)
+
+    def test_get_int_valueerror(self):
+        with self.assertRaises(ConfigError):
+            self.config.get_int('testing', 'bar')
 
     def test_not_found(self):
         """
