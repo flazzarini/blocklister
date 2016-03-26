@@ -4,12 +4,14 @@ from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
 from blocklister import __version__, __changelog__
 from blocklister.models import Blocklist
+from blocklister.config import Config
 from blocklister.exc import FetcherException, EmptyListError
 
 
 app = Flask(__name__)
 limiter = Limiter(app, headers_enabled=True)
-store = "/tmp"
+config = Config()
+store = config.get('blocklister', 'store')
 
 
 @app.errorhandler(IOError)
@@ -78,7 +80,7 @@ def changelog():
     return response
 
 
-@limiter.limit("10 per day")
+@limiter.limit("50 per day")
 @app.route("/<string:blacklist>", methods=['GET'])
 def get_list(blacklist):
     # First find the right class
