@@ -25,7 +25,9 @@ setup(
         "requests",
     ],
     entry_points={
-        'console_scripts': []
+        'console_scripts': [
+            'blocklister-updater=blocklister.updater:run'
+        ]
     },
     dependency_links=[],
     packages=find_packages(exclude=["tests.*", "tests"]),
