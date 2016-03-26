@@ -1,6 +1,5 @@
 import logging
 import re
-from urllib.request import urlretrieve
 from os.path import join
 from blocklister.fetcher import Fetcher
 
@@ -16,11 +15,10 @@ class Blocklist(object):
     template = "firewall_addresslist.jinja2"
     gzip = False
 
-    def __init__(self, store, filename=None, request=urlretrieve):
+    def __init__(self, store, filename=None):
         self.name = self.__class__.__name__.lower()
         self.store = store
         self.filename = filename
-        self.request = request
         self.fetcher = Fetcher(self.source, self.filepath)
 
     def __repr__(self):
