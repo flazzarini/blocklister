@@ -22,7 +22,7 @@ setup(
         "flask-limiter",
         "limits",
         "six",
-        "requests"
+        "requests",
     ],
     entry_points={
         'console_scripts': []
