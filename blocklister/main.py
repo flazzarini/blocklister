@@ -4,7 +4,7 @@ from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
 from blocklister import __version__, __changelog__
 from blocklister.models import Blocklist
-from blocklister.exc import DownloadError, EmptyListError
+from blocklister.exc import FetcherException, EmptyListError
 
 
 app = Flask(__name__)
@@ -42,9 +42,9 @@ def handle_empty_ip_list(exc):
     return response
 
 
-@app.errorhandler(DownloadError)
+@app.errorhandler(FetcherException)
 def handle_downloaderror(exc):
-    msg = "Error downloading requested list"
+    msg = "{}".format(exc)
     response = make_response(msg, 500)
     response.headers['Content-Type'] = "text/plain"
     return response
@@ -83,14 +83,12 @@ def changelog():
 def get_list(blacklist):
     # First find the right class
     bl = Blocklist.get_class(blacklist, store)
+    ips = bl.get_ips()
 
-    # Get File if it does not exist yet
-    if not bl.file_exists:
-        bl.get()
-
-    # Check if file is older than 3 days, if so update
-    if (datetime.now() - bl.last_saved).days > 3:
-        bl.get()
+    if not ips:
+        raise EmptyListError(
+            "No ips found for {}".format(blacklist.title())
+        )
 
     # Get User variables if any
     listname = request.args.get(
@@ -101,13 +99,6 @@ def get_list(blacklist):
         "comment",
         "{}".format(bl.__class__.__name__.title())
     )
-
-    ips = bl.get_ips()
-
-    if not ips:
-        raise EmptyListError(
-            "No ips found for {}".format(blacklist.title())
-        )
 
     result = render_template(
         "mikrotik_addresslist.jinja2",
