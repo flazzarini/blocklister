@@ -4,7 +4,7 @@ import fabric.api as fab
 import fabric.colors as clr
 
 PYREPO_DIR = "/var/www/gefoo.org/pyrepo"
-PYREPO_URL = "http://pyrepo.gefoo.org"
+PYREPO_URL = "https://pyrepo.gefoo.org"
 DEPLOY_DIR = "/var/www/gefoo.org/blocklister"
 PACKAGE_NAME = 'blocklister'
 USER = 'blocklister'
@@ -58,15 +58,21 @@ def deploy():
 
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
-            fab.run("env/bin/pip uninstall -y {}".format(PACKAGE_NAME))
-            fab.run("env/bin/pip install --upgrade {}".format(dest_filename))
+            fab.run(
+                "env/bin/pip uninstall --trusted-host pyrepo.gefoo.org -y {}"
+                .format(PACKAGE_NAME))
+            fab.run(
+                "env/bin/pip install --trusted-host pyrepo.gefoo.org "
+                "--upgrade {}"
+                .format(dest_filename))
 
     else:
         fab.execute("publish")
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
             fab.run(
-                "env/bin/pip install --upgrade -f {} {}"
+                "env/bin/pip install --trusted-host pyrepo.gefoo.org "
+                "--upgrade -f {} {}"
                 .format(PYREPO_URL, PACKAGE_NAME)
             )
 

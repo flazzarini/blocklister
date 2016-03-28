@@ -1,3 +1,4 @@
+include requirements.txt
 include blocklister/version.txt
 include blocklister/changelog.txt
 include blocklister/templates/*.jinja2

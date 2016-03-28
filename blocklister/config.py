@@ -32,14 +32,6 @@ class Config(object):
                 self.loadedfiles.append(searchfile)
                 self.config.read(searchfile)
 
-        if not self.loadedfiles:
-            msg = (
-                "Config file {0} not found! Please create a config file in "
-                "one of the following folders: {1}"
-                .format(self.filename, ", ".join(DEFAULT_PATHS)))
-            LOG.error(msg)
-            raise ConfigError(msg)
-
     def get(self, section, option, default=None):
         """
         Returns the value of an option in a section in the config file. When
