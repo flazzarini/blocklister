@@ -84,13 +84,6 @@ class TestConfig(unittest.TestCase):
         with self.assertRaises(ConfigError):
             self.config.get_int('testing', 'bar')
 
-    def test_not_found(self):
-        """
-        Test for config file not found
-        """
-        with self.assertRaises(ConfigError):
-            Config(filename="tztztztztest1234.ini")
-
     @patch('blocklister.config.exists')
     def test_load_searchfile(self, exists_mock):
         """
