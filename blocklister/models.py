@@ -1,6 +1,8 @@
 import logging
 import re
 from os.path import join
+from datetime import timedelta
+
 from blocklister.fetcher import Fetcher
 
 
@@ -15,11 +17,13 @@ class Blocklist(object):
     template = "firewall_addresslist.jinja2"
     gzip = False
 
-    def __init__(self, store, filename=None):
+    def __init__(self, store, filename=None, refresh_list=timedelta(days=2)):
         self.name = self.__class__.__name__.lower()
         self.store = store
         self.filename = filename
-        self.fetcher = Fetcher(self.source, self.filepath)
+        self.refresh_list = refresh_list
+        self.fetcher = Fetcher(
+            self.source, self.filepath, refresh=self.refresh_list)
 
     def __repr__(self):
         return (
