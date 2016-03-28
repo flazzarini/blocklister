@@ -3,7 +3,7 @@ Blocklister
 
 ``Blocklister`` generates MikroTik Router OS compatible address-lists from
 commonly known Internet Blocklists such as `iblocklist`_ and `DShield`_. The
-lists are updated once every 3 days. ``Blocklister`` is heavily inspired by
+lists are updated once every 2 days. ``Blocklister`` is heavily inspired by
 `Joshaven Potter's blog post`_.
 
 Currently supported lists
