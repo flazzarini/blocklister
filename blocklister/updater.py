@@ -1,6 +1,7 @@
 import logging
 import time
 from threading import Thread
+from datetime import timedelta
 
 from blocklister.models import Blocklist
 from blocklister.config import Config
@@ -16,13 +17,17 @@ class Updater(Thread):
             'blocklister', 'store', default="/tmp")
         self.interval = self.config.get_int(
             'blocklister', 'update_interval', default=120)
+        self.refresh_list = self.config.get_int(
+            'blocklister', 'refresh_list', default=2)
 
     def run(self):
         LOG.info("Start Blocklister-Updater")
 
         instances = []
         for subcls in Blocklist.__subclasses__():
-            instances.append(subcls(self.store))
+            instances.append(subcls(
+                self.store,
+                refresh_list=timedelta(days=self.refresh_list)))
 
         while True:
             for instance in instances:
