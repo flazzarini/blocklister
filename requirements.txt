@@ -1,0 +1,6 @@
+Flask==0.10.1
+requests==2.9.0
+Flask-Limiter==0.9.1
+limits
+six
+future
