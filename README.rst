@@ -9,10 +9,160 @@ DShield (http://feeds.dshield.org/block.txt). The lists are updated once every
 Install
 -------
 
-To install `Blocklister` on your machine follow these simple steps.
+To install `Blocklister` on your machine make sure you have `python 2.7
+<http://www.python.org>` or `python 3 <http://www.python.org>` with `virtualenv
+<https://virtualenv.pypa.io/>` installed. Follow the next few steps to get the
+application up and running with a dedicated user and behind an `Apache Webserver
+<http://www.apache.org`.
+
+Dependencies
+~~~~~~~~~~~~
+
+The dependencies listed here are meant for `Ubuntu 14.04
+<http://www.ubuntu.com>`.
 
 .. code-block:: bash
 
-    mkdir /opt/blocklister && cd /opt/blocklister
+    sudo apt-get install apache2 libapache2-mod-wsgi python-virtualenv
+    python-dev supervisor
+
+
+Setup user
+~~~~~~~~~~
+
+In this step we are going to create an individual user for `blocklister` and
+also create a folders for log files and for the `wsgi` script we are going to
+use later on in apache.
+
+.. code-block:: bash
+
+    sudo useradd -c "Blocklister User" -d /var/www/blocklister -m blocklister
+    sudo install -d -m 775 -o www-data -g blocklister /var/www/blocklister/logs
+    sudo install -d -m 755 -o blocklister -g blocklister /var/www/blocklister/wsgi
+
+
+Install application
+~~~~~~~~~~~~~~~~~~~
+
+This will get you the latest version. The package hasn't been published on `pypi
+<http://www.pypi.org>` yet.
+
+.. code-block:: bash
+
+    sudo -u blocklister -i
     virtualenv env
-    ./env/bin/pip install ... # TODO
+    ./env/bin/pip install http://www.github.com/flazzarini/archive/master.zip
+
+Configuration
+~~~~~~~~~~~~~
+
+The configuration file can be put in one of the following places
+`/etc/blocklister/blocklister.conf`, `~/.blocklister.conf` or
+`~/blocklister.conf`. The following options are available.
+
+================ ===========================================================
+ Parameter        Description
+================ ===========================================================
+store             Disk location to be used for storage
+update_interval   Update interval for Updater Daemon (in seconds)
+refresh_list      Refresh lists after x days (in days)
+================ ===========================================================
+
+.. code-block:: ini
+
+    [blocklister]
+    store = /tmp
+    update_interval = 120
+    refresh_list = 2
+
+
+Updater Daemon
+~~~~~~~~~~~~~~
+
+Next we will setup the `Updater` daemon. We are going to use `supervisor
+<http://wwww.supervisord.org>` for this. In order to do this add the following
+configuration file to `/etc/supervisor/conf.d`.
+
+.. code-block:: ini
+
+    [program:blocklister-updater]
+    command=/var/www/blocklister/env/bin/blocklister-updater
+    directory=/var/www/blocklister/
+    autostart=true
+    user=blocklister
+    stderr_logfile=/var/www/blocklister/logs/updater.log
+    stderr_capture_maxbytes=2MB
+    environment=HOME="/var/www/blocklister",USER="blocklister"
+
+Next start `supervisorctl` and reread the configuration file and fire up
+`blocklister-updater`.
+
+.. code-block:: bash
+
+    # sudo supervisorctl
+    supervisor> reread
+    blocklister-updater: available
+    supervisor> update
+    blocklister-updater: added process group
+    supervisor> status
+    blocklister-updater              RUNNING    pid 9535, uptime 0:00:03
+
+
+WSGI Script
+~~~~~~~~~~~
+
+Next we are going to place the wsgi script into
+`/var/www/blocklister/wsgi/blocklister.wsgi`. This file will be needed in the
+next step to get apache up and running.
+
+.. code-block:: python
+
+    activate_this = "/var/www/blocklister/env/bin/activate_this.py"
+    execfile(activate_this, dict(__file__=activate_this))
+
+    from blocklister.main import app as application
+
+
+Apache Config
+~~~~~~~~~~~~~
+
+Now all that's left to do is to get apache up and running. First make sure that
+you have `mod-wsgi` enabled.
+
+.. code-block:: bash
+
+    a2enmod wsgi
+    service apache2 reload
+
+Now put the following content into
+`/etc/apache2/sites-available/blocklister.conf`.
+
+.. code-block:: xml
+
+    <VirtualHost *:80>
+        ServerAdmin blocklister@yourdomain.org
+        ServerName blocklister.yourdomain.org
+        ServerAlias blocklister
+
+        WSGIDaemonProcess blocklister user=blocklister group=blocklister threads=5
+        WSGIScriptAlias / /var/www/blocklister/wsgi/blocklister.wsgi
+
+        <Directory /var/www/blocklister>
+            WSGIProcessGroup blocklister
+            WSGIApplicationGroup %{GLOBAL}
+            Order deny,allow
+            Allow from all
+        </Directory>
+
+        # Log Files
+        LogLevel warn
+        CustomLog /var/www/blocklister/logs/access.log combined
+        ErrorLog  /var/www/blocklister/logs/error.log
+    </VirtualHost>
+
+Next enable the site and reload apache, and the site should be up and running.
+
+.. code-block:: bash
+
+    sudo a2ensite blocklister
+    sudo service apache2 reload
