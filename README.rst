@@ -1,10 +1,10 @@
 Blocklister
 ===========
 
-``Blocklister`` generates MikroTik Router OS compatible address-lists from commonly
-known Internet Blocklists such as iblocklist (https://www.iblocklist.com) and
-DShield (http://feeds.dshield.org/block.txt). The lists are updated once every
-3 days. ``Blocklister`` is heavily inspired by `Joshaven Potter's blog post <http://joshaven.com/resources/tricks/mikrotik-automatically-updated-address-list/>`.
+``Blocklister`` generates MikroTik Router OS compatible address-lists from
+commonly known Internet Blocklists such as `iblocklist`_ and `DShield`_. The
+lists are updated once every 3 days. ``Blocklister`` is heavily inspired by
+`Joshaven Potter's blog post`_.
 
 Currently supported lists
 -------------------------
@@ -12,48 +12,46 @@ Currently supported lists
 Here a list of currently supported lists. All of the original sources are linked
 here.
 
-* `Ads <https://www.iblocklist.com/list?list=dgxtneitpuvgqqcpfulq>`
-* `Spyware <http://list.iblocklist.com/?list=bt_spyware>`
-* `Level1 <http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw>`
-* `Level2 <http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw>`
-* `Level3 <http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh>`
-* `Edu <http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh>`
-* `Proxy <http://list.iblocklist.com/?list=xoebmbyexwuiogmbyprb>`
-* `Badpeers <http://list.iblocklist.com/?list=cwworuawihqvocglcoss>`
-* `Microsoft <http://list.iblocklist.com/?list=xshktygkujudfnjfioro>`
-* `Spider <http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy>`
-* `Hijacked <http://list.iblocklist.com/?list=usrcshglbiilevmyfhse>`
-* `Dshield <http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv>`
-* `Malwaredomainlist <http://www.malwaredomainlist.com/hostslist/ip.txt>`
-* `Openbl <https://www.openbl.org/lists/base.txt.gz>`
-* `Openbl_180 <https://www.openbl.org/lists/base_180days.txt.gz>`
-* `Openbl_360 <https://www.openbl.org/lists/base_360days.txt.gz>`
-* `Spamhausdrop <https://www.spamhaus.org/drop/drop.txt>`
-* `Spamhausedrop <https://www.spamhaus.org/drop/edrop.txt>`
-* `Blocklistde_All <http://lists.blocklist.de/lists/all.txt>`
-* `Blocklistde_Ssh <http://lists.blocklist.de/lists/ssh.txt>`
-* `Blocklistde_Mail <http://lists.blocklist.de/lists/mail.txt>`
-* `Blocklistde_Imap <http://lists.blocklist.de/lists/imap.txt>`
-* `Blocklistde_Apache <http://lists.blocklist.de/lists/apache.txt>`
-* `Blocklistde_Ftp <http://lists.blocklist.de/lists/ftp.txt>`
-* `Blocklistde_Strongips <http://lists.blocklist.de/lists/strongips.txt>`
+* Ads - https://www.iblocklist.com/list?list=dgxtneitpuvgqqcpfulq
+* Spyware - http://list.iblocklist.com/?list=bt_spyware
+* Level1 - http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw
+* Level2 - http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw
+* Level3 - http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh
+* Edu - http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh
+* Proxy - http://list.iblocklist.com/?list=xoebmbyexwuiogmbyprb
+* Badpeers - http://list.iblocklist.com/?list=cwworuawihqvocglcoss
+* Microsoft - http://list.iblocklist.com/?list=xshktygkujudfnjfioro
+* Spider - http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy
+* Hijacked - http://list.iblocklist.com/?list=usrcshglbiilevmyfhse
+* Dshield - http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv
+* Malwaredomainlist - http://www.malwaredomainlist.com/hostslist/ip.txt
+* Openbl - https://www.openbl.org/lists/base.txt.gz
+* Openbl_180 - https://www.openbl.org/lists/base_180days.txt.gz
+* Openbl_360 - https://www.openbl.org/lists/base_360days.txt.gz
+* Spamhausdrop - https://www.spamhaus.org/drop/drop.txt
+* Spamhausedrop - https://www.spamhaus.org/drop/edrop.txt
+* Blocklistde_All - http://lists.blocklist.de/lists/all.txt
+* Blocklistde_Ssh - http://lists.blocklist.de/lists/ssh.txt
+* Blocklistde_Mail - http://lists.blocklist.de/lists/mail.txt
+* Blocklistde_Imap - http://lists.blocklist.de/lists/imap.txt
+* Blocklistde_Apache - http://lists.blocklist.de/lists/apache.txt
+* Blocklistde_Ftp - http://lists.blocklist.de/lists/ftp.txt
+* Blocklistde_Strongips - http://lists.blocklist.de/lists/strongips.txt
 
 
 Install
 -------
 
-To install ``Blocklister`` on your machine make sure you have `python 2.7
-<http://www.python.org>` or `python 3 <http://www.python.org>` with `virtualenv
-<https://virtualenv.pypa.io>` installed. Follow the next few steps to get the
-application up and running with a dedicated user and behind an `Apache Webserver
-<http://www.apache.org>`.
+To install ``Blocklister`` on your machine make sure you have `python 2.7`_ or
+`python 3`_ with `virtualenv`_ installed. Follow
+the next few steps to get the application up and running with a dedicated user
+and behind an `Apache Webserver`_.
 
 
 Dependencies
 ~~~~~~~~~~~~
 
-The dependencies listed here are meant for `Ubuntu 14.04
-<http://www.ubuntu.com>`.
+The dependencies listed here are meant for `Ubuntu 14.04`_.
 
 .. code-block:: bash
 
@@ -66,7 +64,7 @@ Setup user
 
 In this step we are going to create an individual user for ``Blocklister`` and
 also create a folders for log files and for the `wsgi` script we are going to
-use later on in apache.
+use later on in `apache`_.
 
 .. code-block:: bash
 
@@ -78,8 +76,8 @@ use later on in apache.
 Install application
 ~~~~~~~~~~~~~~~~~~~
 
-This will get you the latest version. The package hasn't been published on `pypi
-<http://www.pypi.org>` yet.
+This will get you the latest version. The package hasn't been published on
+`pypi`_ yet.
 
 .. code-block:: bash
 
@@ -113,9 +111,9 @@ refresh_list      Refresh lists after x days (in days)
 Updater Daemon
 ~~~~~~~~~~~~~~
 
-Next we will setup the ``Updater`` daemon. We are going to use `supervisor
-<http://wwww.supervisord.org>` for this. In order to do this add the following
-configuration file to ``/etc/supervisor/conf.d/blocklister-updater.conf``.
+Next we will setup the ``Updater`` daemon. We are going to use `supervisor`_ for
+this. In order to do this add the following configuration file to
+``/etc/supervisor/conf.d/blocklister-updater.conf``.
 
 .. code-block:: ini
 
@@ -194,7 +192,7 @@ Now put the following content into
         ErrorLog  /var/www/blocklister/logs/error.log
     </VirtualHost>
 
-Next enable the site and reload apache, and the site should be up and running.
+Next enable the site and reload `apache`_, and the site should be up and running.
 
 .. code-block:: bash
 
@@ -205,5 +203,20 @@ Next enable the site and reload apache, and the site should be up and running.
 Issues or Requests
 ------------------
 
-For issues and requests please use the issue tracker on github or `email me
-<flazzarini@gmail.com>`.
+For issues and requests please use the issue tracker on `github`_ or `email
+me`_.
+
+
+.. _iblocklist: https://www.iblocklist.com
+.. _DShield: http://feeds.dshield.org/block.txt
+.. _Joshaven Potter's blog post: http://joshaven.com/resources/tricks/mikrotik-automatically-updated-address-list
+.. _python 2.7: http://www.python.org
+.. _python 3: http://www.python.org
+.. _virtualenv: https://virtualenv.pypa.io
+.. _Apache Webserver: http://www.apache.org
+.. _apache: http://www.apache.org
+.. _Ubuntu 14.04: http://www.ubuntu.com
+.. _pypi: http://www.pypi.org
+.. _supervisor: http://www.supervisord.org
+.. _github: http://www.github.com
+.. _email me: flazzarini@gmail.com
