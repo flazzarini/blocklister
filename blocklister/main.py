@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
+
 from blocklister import __version__, __changelog__
 from blocklister.models import Blocklist
 from blocklister.config import Config
