@@ -171,7 +171,7 @@ Now put the following content into
 
 .. code-block:: xml
 
-    <VirtualHost \*:80>
+    <VirtualHost *:80>
         ServerAdmin blocklister@yourdomain.org
         ServerName blocklister.yourdomain.org
         ServerAlias blocklister
