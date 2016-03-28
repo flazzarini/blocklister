@@ -1,0 +1,13 @@
+[blocklister]
+; Disk location to be used for storage
+store = /tmp/
+
+; Update interval for Updater Daemon in seconds
+update_interval = 120
+
+; Locally stored list should get older than (in days)
+refresh_list = 2
+
+; Whitelist these IPs from being blocked due to heavy traffic
+whitelist_ips = 127.0.0.1 \
+    192.168.0.1

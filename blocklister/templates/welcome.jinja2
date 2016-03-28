@@ -1,5 +1,6 @@
 Welcome to Blocklister
 ----------------------
+
 Blocklister generates MikroTik Router OS compatible address-lists from commonly
 known Internet Blocklists such as iblocklist (https://www.iblocklist.com) and
 DShield (http://feeds.dshield.org/block.txt). The lists are updated once every
@@ -14,7 +15,7 @@ comment by default the name of the list and later add the entire list again.
 The addresslist name and comment can be customized by query parameters which
 are explained in the following paragraph.
 
-Please note that each ip is limited to 10 requests per day.
+Please note that each ip is limited to 50 requests per day.
 
 Query Parameters
 -----------------
@@ -46,6 +47,14 @@ automatically.
   add name="Blocklister_download_Ads" source="\
   /tool fetch url=\"https://blocklister.gefoo.org/ads\" dst-path=\"ads.rsc\";\
   /import file-name=\"ads.rsc\";"
+
+
+Source
+------
+
+Source code of blocklister is available at
+http://www.github.com/flazzarini/blocklister.  Please feel free to report any
+issues using the gituhub issue tracker.
 
 
 {{ "---"|center }}
