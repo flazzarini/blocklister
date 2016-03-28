@@ -4,7 +4,40 @@ Blocklister
 `Blocklister` generates MikroTik Router OS compatible address-lists from commonly
 known Internet Blocklists such as iblocklist (https://www.iblocklist.com) and
 DShield (http://feeds.dshield.org/block.txt). The lists are updated once every
-3 days.
+3 days. `Blocklister` is heavily inspired by `Joshaven Potter's blog post <http://joshaven.com/resources/tricks/mikrotik-automatically-updated-address-list/>`.
+
+Currently supported lists
+-------------------------
+
+Here a list of currently supported lists. All of the original sources are linked
+here.
+
+    * `Ads <https://www.iblocklist.com/list?list=dgxtneitpuvgqqcpfulq>`
+    * `Spyware <http://list.iblocklist.com/?list=bt_spyware>`
+    * `Level1 <http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw>`
+    * `Level2 <http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw>`
+    * `Level3 <http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh>`
+    * `Edu <http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh>`
+    * `Proxy <http://list.iblocklist.com/?list=xoebmbyexwuiogmbyprb>`
+    * `Badpeers <http://list.iblocklist.com/?list=cwworuawihqvocglcoss>`
+    * `Microsoft <http://list.iblocklist.com/?list=xshktygkujudfnjfioro>`
+    * `Spider <http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy>`
+    * `Hijacked <http://list.iblocklist.com/?list=usrcshglbiilevmyfhse>`
+    * `Dshield <http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv>`
+    * `Malwaredomainlist <http://www.malwaredomainlist.com/hostslist/ip.txt>`
+    * `Openbl <https://www.openbl.org/lists/base.txt.gz>`
+    * `Openbl_180 <https://www.openbl.org/lists/base_180days.txt.gz>`
+    * `Openbl_360 <https://www.openbl.org/lists/base_360days.txt.gz>`
+    * `Spamhausdrop <https://www.spamhaus.org/drop/drop.txt>`
+    * `Spamhausedrop <https://www.spamhaus.org/drop/edrop.txt>`
+    * `Blocklistde_All <http://lists.blocklist.de/lists/all.txt>`
+    * `Blocklistde_Ssh <http://lists.blocklist.de/lists/ssh.txt>`
+    * `Blocklistde_Mail <http://lists.blocklist.de/lists/mail.txt>`
+    * `Blocklistde_Imap <http://lists.blocklist.de/lists/imap.txt>`
+    * `Blocklistde_Apache <http://lists.blocklist.de/lists/apache.txt>`
+    * `Blocklistde_Ftp <http://lists.blocklist.de/lists/ftp.txt>`
+    * `Blocklistde_Strongips <http://lists.blocklist.de/lists/strongips.txt>`
+
 
 Install
 -------
@@ -14,6 +47,7 @@ To install `Blocklister` on your machine make sure you have `python 2.7
 <https://virtualenv.pypa.io/>` installed. Follow the next few steps to get the
 application up and running with a dedicated user and behind an `Apache Webserver
 <http://www.apache.org`.
+
 
 Dependencies
 ~~~~~~~~~~~~
@@ -139,7 +173,7 @@ Now put the following content into
 
 .. code-block:: xml
 
-    <VirtualHost *:80>
+    <VirtualHost \*:80>
         ServerAdmin blocklister@yourdomain.org
         ServerName blocklister.yourdomain.org
         ServerAlias blocklister
@@ -166,3 +200,10 @@ Next enable the site and reload apache, and the site should be up and running.
 
     sudo a2ensite blocklister
     sudo service apache2 reload
+
+
+Issues or Requests
+------------------
+
+For issues and requests please use the issue tracker on github or `email me
+<flazzarini@gmail.com>`.
