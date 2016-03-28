@@ -10,7 +10,7 @@ from blocklister.exc import FetcherException, EmptyListError
 app = Flask(__name__)
 limiter = Limiter(app, headers_enabled=True)
 config = Config()
-store = config.get('blocklister', 'store')
+store = config.get('blocklister', 'store', default="/tmp")
 
 
 @app.errorhandler(IOError)
