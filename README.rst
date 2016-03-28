@@ -133,7 +133,7 @@ Next start ``supervisorctl`` and reread the configuration file and fire up
 
 .. code-block:: bash
 
-    # sudo supervisorctl
+    sudo supervisorctl
     supervisor> reread
     blocklister-updater: available
     supervisor> update
