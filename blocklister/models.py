@@ -163,12 +163,12 @@ class Openbl_360(Blocklist):
 
 
 class Spamhausdrop(Blocklist):
-    source = "https://www.spamhaus.org/drop/drop.txt"
+    source = "http://www.spamhaus.org/drop/drop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
 
 
 class Spamhausedrop(Blocklist):
-    source = "https://www.spamhaus.org/drop/edrop.txt"
+    source = "http://www.spamhaus.org/drop/edrop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
 
 
