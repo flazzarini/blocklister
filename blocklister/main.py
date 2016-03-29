@@ -61,12 +61,14 @@ def handle_ratelimit(exc):
 
 @app.route("/", methods=['GET'])
 def index():
-    lists = Blocklist.__subclasses__()
+    lists = []
+    for subcls in Blocklist.__subclasses__():
+        lists.append(subcls.__name__)
+
     result = render_template(
         "welcome.jinja2",
-        lists=lists,
-        version=__version__
-    )
+        lists=sorted(lists),
+        version=__version__)
     response = make_response(result, 200)
     response.headers['Content-Type'] = "text/plain"
     return response
