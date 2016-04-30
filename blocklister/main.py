@@ -11,7 +11,7 @@ app = Flask(__name__)
 limiter = Limiter(app, headers_enabled=True)
 config = Config()
 store = config.get('blocklister', 'store', default="/tmp")
-dedupe = config.get('blocklister', 'deduplicate', default=false)
+dedupe = config.get('blocklister', 'deduplicate', default=False)
 
 @app.errorhandler(IOError)
 def handle_filenotavailable(exc):
