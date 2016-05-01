@@ -114,6 +114,33 @@ def get_list(blacklist):
     return response
 
 
+@limiter.limit("10 per day")
+@app.route("/multilist", methods=['GET'])
+def get_multiple_lists():
+    blocklists = request.args.get('blocklists', None)
+    listname = request.args.get("listname", "blocklist")
+    blists = [] if not blocklists else blocklists.split(',')
+    comment = request.args.get("comment", "multilist")
+    ips = []
+
+    for blist in blists:
+        try:
+            bl = Blocklist.get_class(blist, store)
+            ips.extend(bl.get_ips())
+        except ValueError:
+            # Silently ignore unknown blocklist
+            pass
+
+    result = render_template(
+        "mikrotik_addresslist.jinja2",
+        ips=ips,
+        listname=listname,
+        comment=comment)
+    response = make_response(result, 200)
+    response.headers['Content-Type'] = "text/plain"
+    return response
+
+
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level=logging.DEBUG)
