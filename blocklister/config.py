@@ -92,6 +92,23 @@ class Config(object):
                 .format(section, option))
             raise ConfigError(msg)
 
+    def get_boolean(self, section, option, default=0):
+        """
+        Return the value of the option specified as a boolean.
+        """
+        try:
+            value = self.config.getboolean(section, option)
+            return value
+        except (NoSectionError, NoOptionError) as exc:
+            LOG.debug(
+                "{0} Returning specified default value {1}"
+                .format(exc, default))
+            return default
+        except ValueError as exc:
+            msg = (
+                "Value in section {0} option {1} cannot be cast as boolean"
+                .format(section, option))
+            raise ConfigError(msg)
 
 class ConfigError(Exception):
     pass
