@@ -98,6 +98,7 @@ The configuration file can be put in one of the following places
 store             Disk location to be used for storage
 update_interval   Update interval for Updater Daemon (in seconds)
 refresh_list      Refresh lists after x days (in days)
+deduplicate       Summarize sequential IPs into ranges
 ================ ===========================================================
 
 .. code-block:: ini
@@ -106,6 +107,7 @@ refresh_list      Refresh lists after x days (in days)
     store = /tmp
     update_interval = 120
     refresh_list = 2
+    deduplicate = true
 
 
 Updater Daemon
