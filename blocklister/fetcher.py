@@ -121,7 +121,7 @@ class Fetcher(object):
         """
         try:
             response = requests.get(url)
-        except (OSError, requests.exceptions.ConnectionError) as exc:
+        except IOError as exc:
             raise FetcherException(exc)
 
         if response.status_code != 200:
