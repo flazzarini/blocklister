@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from blocklister.models import Blocklist
 from blocklister.config import Config
+from blocklister.exc import FetcherException
 
 LOG = logging.getLogger(__name__)
 
@@ -31,11 +32,14 @@ class Updater(Thread):
 
         while True:
             for instance in instances:
-                if instance.fetcher.needs_update:
-                    LOG.info(
-                        "Updating Blocklister list {}".format(
-                            instance.__class__.__name__))
-                    instance.fetcher.update()
+                try:
+                    if instance.fetcher.needs_update:
+                        LOG.info(
+                            "Updating Blocklister list {}".format(
+                                instance.__class__.__name__))
+                        instance.fetcher.update()
+                except FetcherException as exc:
+                    LOG.error(exc)
             time.sleep(self.interval)
 
 

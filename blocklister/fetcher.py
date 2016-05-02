@@ -90,14 +90,19 @@ class Fetcher(object):
             self.update()
         elif getsize(self.filename) == 0:
             LOG.error("File %s has 0 bytes updating it" % self.filename)
-            self.update()
+            try:
+                self.update()
+            except FetcherException:
+                raise
 
     def update(self):
         """
         Update the file by getting the source url
         """
         LOG.info("Get update from %s" % self.url)
+
         resource = self._get_resource(self.url)
+
         fileobj = open(self.filename, 'w+')
         fileobj.seek(0)
         fileobj.write(resource.content.decode('ascii', 'ignore'))
@@ -116,7 +121,7 @@ class Fetcher(object):
         """
         try:
             response = requests.get(url)
-        except Exception as exc:
+        except IOError as exc:
             raise FetcherException(exc)
 
         if response.status_code != 200:
