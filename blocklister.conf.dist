@@ -11,3 +11,6 @@ refresh_list = 2
 ; Whitelist these IPs from being blocked due to heavy traffic
 whitelist_ips = 127.0.0.1 \
     192.168.0.1
+
+; Activate deduplication of IPs
+deduplicate = true

@@ -5,13 +5,13 @@ from blocklister import __version__, __changelog__
 from blocklister.models import Blocklist
 from blocklister.config import Config
 from blocklister.exc import FetcherException, EmptyListError
-
+from blocklister.summerizer import Summerizer
 
 app = Flask(__name__)
 limiter = Limiter(app, headers_enabled=True)
 config = Config()
 store = config.get('blocklister', 'store', default="/tmp")
-
+dedupe = config.get_boolean('blocklister', 'deduplicate', default=False)
 
 @app.errorhandler(IOError)
 def handle_filenotavailable(exc):
@@ -92,6 +92,11 @@ def get_list(blacklist):
         raise EmptyListError(
             "No ips found for {}".format(blacklist.title())
         )
+
+    # If deduplicating, process
+    if dedupe:
+        smr = Summerizer(ips)
+        ips = smr.summary()
 
     # Get User variables if any
     listname = request.args.get(
