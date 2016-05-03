@@ -31,3 +31,10 @@ class TestSummerizer(unittest.TestCase):
         result = smr.summary()
         expected = ['72.32.242.248-72.32.243.255']
         self.assertCountEqual(result, expected)
+
+    def test_overlaps(self):
+        smr = Summerizer(
+            ['1.1.1.1-1.1.1.5', '1.1.1.2'])
+        result = smr.summary()
+        expected = ['1.1.1.1-1.1.1.5']
+        self.assertCountEqual(result, expected)
