@@ -45,7 +45,7 @@ class Blocklist(object):
             _filename = self.name + '.txt'
         return join(self.store, _filename)
 
-    def get_ips(self):
+    def get_ips(self, raw=True):
         """
         Runs through the source file line by line to parse the lines and return
         a list `IPv4Network`s.
@@ -72,14 +72,21 @@ class Blocklist(object):
                 continue
 
             if len(res.groups()) == 1:
-                entry = IPv4Network(res.groups()[0])
-                results.append(entry)
+                if raw:
+                    results.append(res.groups()[0])
+                else:
+                    entry = IPv4Network(res.groups()[0])
+                    results.append(entry)
 
             elif len(res.groups()) > 1:
-                start = IPv4Address(res.groups()[0])
-                end = IPv4Address(res.groups()[1])
-                networks = list(summarize_address_range(start, end))
-                results += networks
+                if raw:
+                    results.append(
+                        "{}-{}".format(res.groups()[0], res.groups()[1]))
+                else:
+                    start = IPv4Address(res.groups()[0])
+                    end = IPv4Address(res.groups()[1])
+                    networks = list(summarize_address_range(start, end))
+                    results += networks
 
             linenr += 1
 
