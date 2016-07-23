@@ -1,4 +1,5 @@
 import unittest
+from ipaddress import IPv4Network
 from unittest.mock import patch, MagicMock
 
 import os
@@ -82,6 +83,7 @@ class TestBlocklist(TestBlocklistBase):
             Blocklist.get_class('nonexisting', store)
 
     def test_get_ips_simple(self):
+        self.maxDiff = None
         contents = dedent(
             """
             Test:1.1.1.1-2.2.2.2
@@ -91,13 +93,38 @@ class TestBlocklist(TestBlocklistBase):
         self.tempfile.file.write(contents.encode('utf-8'))
         self.tempfile.file.flush()
         expected = [
-            '1.1.1.1-2.2.2.2',
-            '3.3.3.3-3.3.3.3'
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('1.1.1.2/31'),
+            IPv4Network('1.1.1.4/30'),
+            IPv4Network('1.1.1.8/29'),
+            IPv4Network('1.1.1.16/28'),
+            IPv4Network('1.1.1.32/27'),
+            IPv4Network('1.1.1.64/26'),
+            IPv4Network('1.1.1.128/25'),
+            IPv4Network('1.1.2.0/23'),
+            IPv4Network('1.1.4.0/22'),
+            IPv4Network('1.1.8.0/21'),
+            IPv4Network('1.1.16.0/20'),
+            IPv4Network('1.1.32.0/19'),
+            IPv4Network('1.1.64.0/18'),
+            IPv4Network('1.1.128.0/17'),
+            IPv4Network('1.2.0.0/15'),
+            IPv4Network('1.4.0.0/14'),
+            IPv4Network('1.8.0.0/13'),
+            IPv4Network('1.16.0.0/12'),
+            IPv4Network('1.32.0.0/11'),
+            IPv4Network('1.64.0.0/10'),
+            IPv4Network('1.128.0.0/9'),
+            IPv4Network('2.0.0.0/15'),
+            IPv4Network('2.2.0.0/23'),
+            IPv4Network('2.2.2.0/31'),
+            IPv4Network('2.2.2.2/32'),
+            IPv4Network('3.3.3.3/32'),
         ]
         result = self.bl.get_ips()
         self.assertCountEqual(result, expected)
 
-
+'''
 class TestAds(TestBlocklistBase):
     def setUp(self):
         super(TestAds, self).setUp()
@@ -646,3 +673,5 @@ class TestBlocklistde_Strongips(TestBlocklistBase):
         ]
         result = self.blde.get_ips()
         self.assertCountEqual(result, expected)
+
+'''
