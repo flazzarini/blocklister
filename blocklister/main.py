@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, request, render_template, make_response
 from flask.ext.limiter import Limiter
 
@@ -7,6 +9,7 @@ from blocklister.config import Config
 from blocklister.exc import FetcherException, EmptyListError
 
 
+LOG = logging.getLogger(__name__)
 app = Flask(__name__)
 limiter = Limiter(app, headers_enabled=True)
 config = Config()
@@ -24,7 +27,7 @@ def handle_filenotavailable(exc):
 @app.errorhandler(ValueError)
 def handle_unknown_blacklist(exc):
     routes = [
-        "/{}".format(x.__name__.lower()) for x in Blocklist.__subclasses__()
+        "/%s" % x.__name__.lower() for x in Blocklist.__subclasses__()
     ]
     msg = render_template(
         'unknown_blacklist.jinja2',
@@ -45,7 +48,9 @@ def handle_empty_ip_list(exc):
 
 @app.errorhandler(FetcherException)
 def handle_downloaderror(exc):
-    msg = "{}".format(exc)
+    msg = (
+        "Fetcher was unable to download the latest file from upstream "
+        "provider")
     response = make_response(msg, 500)
     response.headers['Content-Type'] = "text/plain"
     return response
@@ -101,19 +106,13 @@ def get_list(blacklist):
     ips = bl.get_ips(cidr_notation=cidr_notation)
 
     if not ips:
-        raise EmptyListError(
-            "No ips found for {}".format(blacklist.title())
-        )
+        raise EmptyListError("No ips found for %s" % blacklist.title())
 
     # Get User variables if any
     listname = request.args.get(
-        "listname",
-        "{}_list".format(bl.__class__.__name__.lower())
-    )
+        "listname", default="%s_list" % bl.__class__.__name__.lower())
     comment = request.args.get(
-        "comment",
-        "{}".format(bl.__class__.__name__.title())
-    )
+        "comment", default="%s" % bl.__class__.__name__.title())
 
     result = render_template(
         "mikrotik_addresslist.jinja2",
