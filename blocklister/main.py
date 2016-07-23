@@ -59,6 +59,15 @@ def handle_ratelimit(exc):
     return response
 
 
+@limiter.request_filter
+def check_whitelist():
+    whitelist_ips = config.get('blocklister', 'whitelist_ips', "").split("\n")
+    if request.remote_addr in whitelist_ips:
+        LOG.debug("%s is whitelisted" % request.remote_addr)
+        return True
+    return False
+
+
 @app.route("/", methods=['GET'])
 def index():
     lists = []
