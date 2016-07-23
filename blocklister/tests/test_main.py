@@ -55,3 +55,32 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         self.assertEqual(result.mimetype, "text/plain")
         self.assertIn("Magicmock", result.get_data().decode('utf-8'))
+
+    @patch('blocklister.main.Blocklist')
+    def test_get_default_lists_cidr(self, bl_mock):
+        klass = MagicMock()
+        klass.__name__ = "test"
+        type(klass).last_saved = PropertyMock(return_value=datetime.now())
+        klass.get_ips.return_value = ['1.1.1.1/32']
+
+        bl_mock.get_class.return_value = klass
+
+        url = "/{}?cidr=enabled".format(klass.__name__.lower())
+        result = self.client.get(url)
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.mimetype, "text/plain")
+
+    @patch('blocklister.main.Blocklist')
+    def test_get_lists_listname_cidr(self, bl_mock):
+        klass = MagicMock()
+        klass.__name__ = "test"
+        type(klass).last_saved = PropertyMock(return_value=datetime.now())
+        klass.get_ips.return_value = ['1.1.1.1/32']
+
+        bl_mock.get_class.return_value = klass
+
+        url = "/{}?cidr=enabled".format(klass.__name__.lower())
+        result = self.client.get(url)
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.mimetype, "text/plain")
+        self.assertIn("Magicmock", result.get_data().decode('utf-8'))
