@@ -128,10 +128,10 @@ def get_list(blacklist):
 @limiter.limit("10 per day")
 @app.route("/multilist", methods=['GET'])
 def get_multiple_lists():
-    blocklists = request.args.get('blocklists', None)
-    listname = request.args.get("listname", "blocklist")
+    blocklists = request.args.get('blocklists', default=None)
+    listname = request.args.get("listname", default="blocklist")
     blists = [] if not blocklists else blocklists.split(',')
-    comment = request.args.get("comment", "multilist")
+    comment = request.args.get("comment", default="multilist")
     ips = []
 
     for blist in blists:
