@@ -84,9 +84,12 @@ def changelog():
 @limiter.limit("50 per day")
 @app.route("/<string:blacklist>", methods=['GET'])
 def get_list(blacklist):
+    # Get query arguments
+    cidr_notation = request.args.get('cidr', default=False)
+
     # First find the right class
     bl = Blocklist.get_class(blacklist, store)
-    ips = bl.get_ips()
+    ips = bl.get_ips(cidr_notation=cidr_notation)
 
     if not ips:
         raise EmptyListError(
