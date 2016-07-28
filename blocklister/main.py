@@ -128,6 +128,9 @@ def get_list(blacklist):
 @limiter.limit("10 per day")
 @app.route("/multilist", methods=['GET'])
 def get_multiple_lists():
+    # Get query arguments
+    cidr_notation = request.args.get('cidr', default=False)
+
     blocklists = request.args.get('blocklists', default=None)
     listname = request.args.get("listname", default="blocklist")
     blists = [] if not blocklists else blocklists.split(',')
@@ -137,7 +140,7 @@ def get_multiple_lists():
     for blist in blists:
         try:
             bl = Blocklist.get_class(blist, store)
-            ips.extend(bl.get_ips())
+            ips.extend(bl.get_ips(cidr_notation=cidr_notation))
         except ValueError:
             # Silently ignore unknown blocklist
             pass
