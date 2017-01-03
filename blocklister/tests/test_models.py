@@ -1,9 +1,8 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
+from ipaddress import IPv4Network
 
 import os
-from io import StringIO, BytesIO
-from gzip import compress
 from tempfile import NamedTemporaryFile
 from textwrap import dedent
 
@@ -82,6 +81,21 @@ class TestBlocklist(TestBlocklistBase):
             Blocklist.get_class('nonexisting', store)
 
     def test_get_ips_simple(self):
+        self.maxDiff = None
+        contents = dedent(
+            """
+            Test:1.1.1.1-2.2.2.2
+            Some other Test:3.3.3.3-3.3.3.3
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = ["1.1.1.1-2.2.2.2", "3.3.3.3-3.3.3.3"]
+        result = self.bl.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        self.maxDiff = None
         contents = dedent(
             """
             Test:1.1.1.1-2.2.2.2
@@ -91,10 +105,35 @@ class TestBlocklist(TestBlocklistBase):
         self.tempfile.file.write(contents.encode('utf-8'))
         self.tempfile.file.flush()
         expected = [
-            '1.1.1.1-2.2.2.2',
-            '3.3.3.3-3.3.3.3'
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('1.1.1.2/31'),
+            IPv4Network('1.1.1.4/30'),
+            IPv4Network('1.1.1.8/29'),
+            IPv4Network('1.1.1.16/28'),
+            IPv4Network('1.1.1.32/27'),
+            IPv4Network('1.1.1.64/26'),
+            IPv4Network('1.1.1.128/25'),
+            IPv4Network('1.1.2.0/23'),
+            IPv4Network('1.1.4.0/22'),
+            IPv4Network('1.1.8.0/21'),
+            IPv4Network('1.1.16.0/20'),
+            IPv4Network('1.1.32.0/19'),
+            IPv4Network('1.1.64.0/18'),
+            IPv4Network('1.1.128.0/17'),
+            IPv4Network('1.2.0.0/15'),
+            IPv4Network('1.4.0.0/14'),
+            IPv4Network('1.8.0.0/13'),
+            IPv4Network('1.16.0.0/12'),
+            IPv4Network('1.32.0.0/11'),
+            IPv4Network('1.64.0.0/10'),
+            IPv4Network('1.128.0.0/9'),
+            IPv4Network('2.0.0.0/15'),
+            IPv4Network('2.2.0.0/23'),
+            IPv4Network('2.2.2.0/31'),
+            IPv4Network('2.2.2.2/32'),
+            IPv4Network('3.3.3.3/32'),
         ]
-        result = self.bl.get_ips()
+        result = self.bl.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -119,6 +158,22 @@ class TestAds(TestBlocklistBase):
         result = self.ads.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Ads:1.1.1.1-1.1.1.1
+            Some stupid ad server:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.ads.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestSpyware(TestBlocklistBase):
     def setUp(self):
@@ -139,6 +194,22 @@ class TestSpyware(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.spyware.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Spyware:1.1.1.0-1.1.1.255
+            Some other spyware:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.spyware.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -163,6 +234,22 @@ class TestLevel1(TestBlocklistBase):
         result = self.level1.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Level:1.1.1.0-1.1.1.255
+            Level:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.level1.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestLevel2(TestBlocklistBase):
     def setUp(self):
@@ -183,6 +270,22 @@ class TestLevel2(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.level2.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Level:1.1.1.0-1.1.1.255
+            Level:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.level2.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -207,6 +310,22 @@ class TestLevel3(TestBlocklistBase):
         result = self.level3.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Level:1.1.1.0-1.1.1.255
+            Level:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.level3.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestEdu(TestBlocklistBase):
     def setUp(self):
@@ -227,6 +346,22 @@ class TestEdu(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.edu.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Edu:1.1.1.0-1.1.1.255
+            Edu:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.edu.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -251,6 +386,22 @@ class TestProxy(TestBlocklistBase):
         result = self.proxy.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Proxy:1.1.1.0-1.1.1.255
+            Proxy:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.proxy.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestBadpeers(TestBlocklistBase):
     def setUp(self):
@@ -260,8 +411,8 @@ class TestBadpeers(TestBlocklistBase):
     def test_get_ips(self):
         contents = dedent(
             """
-            Proxy:1.1.1.0-1.1.1.255
-            Proxy:2.2.2.0-2.2.2.255
+            Badpeers:1.1.1.0-1.1.1.255
+            Badpeers:2.2.2.0-2.2.2.255
             """
         )
         self.tempfile.file.write(contents.encode('utf-8'))
@@ -273,6 +424,22 @@ class TestBadpeers(TestBlocklistBase):
         result = self.badpeers.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Badpeers:1.1.1.0-1.1.1.255
+            Badpeers:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.badpeers.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestMicrosoft(TestBlocklistBase):
     def setUp(self):
@@ -282,8 +449,8 @@ class TestMicrosoft(TestBlocklistBase):
     def test_get_ips(self):
         contents = dedent(
             """
-            Proxy:1.1.1.0-1.1.1.255
-            Proxy:2.2.2.0-2.2.2.255
+            Microsoft:1.1.1.0-1.1.1.255
+            Microsoft:2.2.2.0-2.2.2.255
             """
         )
         self.tempfile.file.write(contents.encode('utf-8'))
@@ -295,6 +462,22 @@ class TestMicrosoft(TestBlocklistBase):
         result = self.microsoft.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Microsoft:1.1.1.0-1.1.1.255
+            Microsoft:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.microsoft.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestHijacked(TestBlocklistBase):
     def setUp(self):
@@ -304,8 +487,8 @@ class TestHijacked(TestBlocklistBase):
     def test_get_ips(self):
         contents = dedent(
             """
-            Proxy:1.1.1.0-1.1.1.255
-            Proxy:2.2.2.0-2.2.2.255
+            Hijacked:1.1.1.0-1.1.1.255
+            Hijacked:2.2.2.0-2.2.2.255
             """
         )
         self.tempfile.file.write(contents.encode('utf-8'))
@@ -317,6 +500,22 @@ class TestHijacked(TestBlocklistBase):
         result = self.hijacked.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Hijacked:1.1.1.0-1.1.1.255
+            Hijacked:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.hijacked.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestSpider(TestBlocklistBase):
     def setUp(self):
@@ -326,8 +525,8 @@ class TestSpider(TestBlocklistBase):
     def test_get_ips(self):
         contents = dedent(
             """
-            Proxy:1.1.1.0-1.1.1.255
-            Proxy:2.2.2.0-2.2.2.255
+            Spider:1.1.1.0-1.1.1.255
+            Spide:2.2.2.0-2.2.2.255
             """
         )
         self.tempfile.file.write(contents.encode('utf-8'))
@@ -339,6 +538,22 @@ class TestSpider(TestBlocklistBase):
         result = self.spider.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Spider:1.1.1.0-1.1.1.255
+            Spider:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.spider.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestDshield(TestBlocklistBase):
     def setUp(self):
@@ -348,8 +563,8 @@ class TestDshield(TestBlocklistBase):
     def test_get_ips(self):
         contents = dedent(
             """
-            Proxy:1.1.1.0-1.1.1.255
-            Proxy:2.2.2.0-2.2.2.255
+            Dshield:1.1.1.0-1.1.1.255
+            Dshield:2.2.2.0-2.2.2.255
             """
         )
         self.tempfile.file.write(contents.encode('utf-8'))
@@ -359,6 +574,22 @@ class TestDshield(TestBlocklistBase):
             '2.2.2.0-2.2.2.255',
         ]
         result = self.dshield.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            Dshield:1.1.1.0-1.1.1.255
+            Dshield:2.2.2.0-2.2.2.255
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.0/24'),
+            IPv4Network('2.2.2.0/24'),
+        ]
+        result = self.dshield.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -383,6 +614,22 @@ class TestMalwaredomainlist(TestBlocklistBase):
         result = self.ml.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.ml.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestOpenbl(TestBlocklistBase):
     def setUp(self):
@@ -403,6 +650,22 @@ class TestOpenbl(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.openbl.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.openbl.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -427,6 +690,22 @@ class TestOpenbl_180(TestBlocklistBase):
         result = self.openbl.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.openbl.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestOpenbl_360(TestBlocklistBase):
     def setUp(self):
@@ -447,6 +726,22 @@ class TestOpenbl_360(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.openbl.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.openbl.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -471,6 +766,22 @@ class TestSpamhausdrop(TestBlocklistBase):
         result = self.spamhaus.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1/32 ; SBLTest
+            2.2.2.2/32 ; SBLTest2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.spamhaus.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestSpamhausedrop(TestBlocklistBase):
     def setUp(self):
@@ -491,6 +802,22 @@ class TestSpamhausedrop(TestBlocklistBase):
             '2.2.2.2/32',
         ]
         result = self.spamhaus.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1/32 ; SBLTest
+            2.2.2.2/32 ; SBLTest2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.spamhaus.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -515,6 +842,22 @@ class TestBlocklistde_All(TestBlocklistBase):
         result = self.blde.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestBlocklistde_Ssh(TestBlocklistBase):
     def setUp(self):
@@ -535,6 +878,22 @@ class TestBlocklistde_Ssh(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -559,6 +918,22 @@ class TestBlocklistde_Mail(TestBlocklistBase):
         result = self.blde.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestBlocklistde_Imap(TestBlocklistBase):
     def setUp(self):
@@ -579,6 +954,22 @@ class TestBlocklistde_Imap(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)
 
 
@@ -603,6 +994,22 @@ class TestBlocklistde_Apache(TestBlocklistBase):
         result = self.blde.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestBlocklistde_Ftp(TestBlocklistBase):
     def setUp(self):
@@ -625,6 +1032,22 @@ class TestBlocklistde_Ftp(TestBlocklistBase):
         result = self.blde.get_ips()
         self.assertCountEqual(result, expected)
 
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
+        self.assertCountEqual(result, expected)
+
 
 class TestBlocklistde_Strongips(TestBlocklistBase):
     def setUp(self):
@@ -645,4 +1068,20 @@ class TestBlocklistde_Strongips(TestBlocklistBase):
             '2.2.2.2',
         ]
         result = self.blde.get_ips()
+        self.assertCountEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network('1.1.1.1/32'),
+            IPv4Network('2.2.2.2/32'),
+        ]
+        result = self.blde.get_ips(cidr_notation=True)
         self.assertCountEqual(result, expected)

@@ -18,11 +18,13 @@ fab.env.roledefs = {
 
 @fab.task
 def develop():
+    dev_packages = [
+        'pytest', 'pytest-xdist', 'pytest-pep8', 'tox', 'httpie'
+    ]
     if not path.exists("env"):
         fab.local("virtualenv -p /usr/bin/python3 env")
     fab.local("env/bin/python setup.py develop")
-    fab.local("env/bin/pip install pytest")
-    fab.local("env/bin/pip install pytest-xdist")
+    fab.local("env/bin/pip install {}".format(" ".join(dev_packages)))
 
 
 @fab.task

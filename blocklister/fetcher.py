@@ -100,9 +100,7 @@ class Fetcher(object):
         Update the file by getting the source url
         """
         LOG.info("Get update from %s" % self.url)
-
         resource = self._get_resource(self.url)
-
         fileobj = open(self.filename, 'w+')
         fileobj.seek(0)
         fileobj.write(resource.content.decode('ascii', 'ignore'))

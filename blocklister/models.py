@@ -2,6 +2,11 @@ import logging
 import re
 from os.path import join
 from datetime import timedelta
+from ipaddress import (
+    IPv4Network,
+    IPv4Address,
+    summarize_address_range
+)
 
 from blocklister.fetcher import Fetcher
 
@@ -40,27 +45,53 @@ class Blocklist(object):
             _filename = self.name + '.txt'
         return join(self.store, _filename)
 
-    def get_ips(self):
+    def get_ips(self, cidr_notation=False):
+        """
+        Runs through the source file line by line to parse the lines and return
+        a list `IPv4Network`s.
+
+        :returns list of textual ipaddress notations
+        :rtype list
+        """
+        # First check if we need a forced update?
         if not self.fetcher.file_exists:
             self.fetcher.update()
 
+        # Run through the list and gather all textual ipaddresses
         results = []
-        with open(self.filepath, 'r') as f:
-            for line in f:
-                res = re.search(self.regex, line)
+        linenr = 1
+        filehandler = open(self.filepath, 'r')
+        for line in filehandler:
+            res = re.search(self.regex, line)
 
-                if not res:
-                    continue
+            if not res:
+                LOG.debug(
+                    "{} Line:{} Regular Expression mismatch {}"
+                    .format(self.filepath, line, self.__class__.__name__)
+                )
+                continue
 
-                entry = ""
-                for el in res.groups():
-                    if not entry:
-                        entry = "{}".format(el)
-                    else:
-                        entry = "{}-{}".format(entry, el)
+            if len(res.groups()) == 1:
+                if cidr_notation:
+                    entry = IPv4Network(res.groups()[0])
+                    results.append(entry)
+                else:
+                    results.append(res.groups()[0])
 
-                results.append(entry)
-        return list(set(results))
+            elif len(res.groups()) > 1:
+                if cidr_notation:
+                    start = IPv4Address(res.groups()[0])
+                    end = IPv4Address(res.groups()[1])
+                    networks = list(summarize_address_range(start, end))
+                    results += networks
+                else:
+                    results.append(
+                        "{}-{}".format(res.groups()[0], res.groups()[1]))
+
+            linenr += 1
+
+        filehandler.close()
+        return list(results)
 
     @classmethod
     def get_class(cls, name, store):

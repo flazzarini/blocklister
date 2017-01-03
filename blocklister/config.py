@@ -1,12 +1,9 @@
-from future.standard_library import install_aliases
-install_aliases()
-
 import logging
-
+from future.standard_library import install_aliases
 from configparser import ConfigParser, NoSectionError, NoOptionError
 from os.path import exists
 
-
+install_aliases()
 LOG = logging.getLogger(__name__)
 DEFAULT_PATHS = ['/etc/blocklister/', '~/.', '']
 
@@ -89,6 +86,24 @@ class Config(object):
         except ValueError as exc:
             msg = (
                 "Value in section {0} option {1} cannot be cast as integer"
+                .format(section, option))
+            raise ConfigError(msg)
+
+    def get_boolean(self, section, option, default=0):
+        """
+        Return the value of the option specified as a boolean.
+        """
+        try:
+            value = self.config.getboolean(section, option)
+            return value
+        except (NoSectionError, NoOptionError) as exc:
+            LOG.debug(
+                "{0} Returning specified default value {1}"
+                .format(exc, default))
+            return default
+        except ValueError as exc:
+            msg = (
+                "Value in section {0} option {1} cannot be cast as boolean"
                 .format(section, option))
             raise ConfigError(msg)
 
