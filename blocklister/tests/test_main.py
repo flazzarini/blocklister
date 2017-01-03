@@ -54,7 +54,7 @@ class TestMain(unittest.TestCase):
             # Now let's add the new ones
             /ip firewall address-list
             add address="1.1.1.1" list="magicmock_list" comment="Magicmock"
-            """)
+            """)  # noqa
         self.assertEqual(result.get_data().decode('ascii'), expected_content)
 
     @patch('blocklister.main.Blocklist')
@@ -82,7 +82,7 @@ class TestMain(unittest.TestCase):
             # Now let's add the new ones
             /ip firewall address-list
             add address="1.1.1.1" list="magicmock_list" comment="Magicmock"
-            """)
+            """)  # noqa
         self.assertEqual(result.get_data().decode('ascii'), expected_content)
 
     @patch('blocklister.main.Blocklist')
@@ -110,7 +110,7 @@ class TestMain(unittest.TestCase):
             # Now let's add the new ones
             /ip firewall address-list
             add address="1.1.1.1/32" list="magicmock_list" comment="Magicmock"
-            """)
+            """)  # noqa
         self.assertEqual(result.get_data().decode('ascii'), expected_content)
 
     @patch('blocklister.main.Blocklist')
@@ -139,7 +139,7 @@ class TestMain(unittest.TestCase):
             # Now let's add the new ones
             /ip firewall address-list
             add address="1.1.1.1/32" list="magicmock_list" comment="Magicmock"
-            """)
+            """)  # noqa
         self.assertEqual(result.get_data().decode('ascii'), expected_content)
 
     @patch('blocklister.main.Blocklist')
@@ -173,7 +173,7 @@ class TestMain(unittest.TestCase):
             /ip firewall address-list
             add address="1.1.1.1" list="blocklist" comment="multilist"
             add address="2.2.2.2" list="blocklist" comment="multilist"
-            """)
+            """)  # noqa
         self.assertEqual(result.get_data().decode('ascii'), expected_content)
 
     @patch('blocklister.main.Blocklist')

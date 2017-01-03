@@ -16,6 +16,7 @@ config = Config()
 store = config.get('blocklister', 'store', default="/tmp")
 dedupe = config.get_boolean('blocklister', 'deduplicate', default=False)
 
+
 @app.errorhandler(IOError)
 def handle_filenotavailable(exc):
     msg = "File on disk is not available"

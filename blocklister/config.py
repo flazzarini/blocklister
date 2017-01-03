@@ -1,12 +1,9 @@
-from future.standard_library import install_aliases
-install_aliases()
-
 import logging
-
+from future.standard_library import install_aliases
 from configparser import ConfigParser, NoSectionError, NoOptionError
 from os.path import exists
 
-
+install_aliases()
 LOG = logging.getLogger(__name__)
 DEFAULT_PATHS = ['/etc/blocklister/', '~/.', '']
 
@@ -109,6 +106,7 @@ class Config(object):
                 "Value in section {0} option {1} cannot be cast as boolean"
                 .format(section, option))
             raise ConfigError(msg)
+
 
 class ConfigError(Exception):
     pass

@@ -85,9 +85,9 @@ class TestConfig(unittest.TestCase):
             self.config.get_int('testing', 'bar')
 
     def test_get_boolean(self):
-        result = self.config.get_boolean('testing','enabled',default=False)
+        result = self.config.get_boolean('testing', 'enabled', default=False)
         expected = True
-        self.assertEqual(result,expected)
+        self.assertEqual(result, expected)
 
     @patch('blocklister.config.exists')
     def test_load_searchfile(self, exists_mock):
