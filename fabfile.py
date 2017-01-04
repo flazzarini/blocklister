@@ -84,6 +84,8 @@ def deploy():
         fab.execute("publish")
         fab.env.user = USER
         with fab.cd(DEPLOY_DIR):
+            fab.run("env/bin/pip install --upgrade pip")
+            fab.run("env/bin/pip install --upgrade setuptools")
             fab.run(
                 "env/bin/pip install --trusted-host pyrepo.gefoo.org "
                 "--upgrade -f {} {}"
