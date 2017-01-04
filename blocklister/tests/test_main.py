@@ -1,6 +1,12 @@
+import sys
 import unittest
 from textwrap import dedent
-from unittest.mock import MagicMock, patch, PropertyMock
+
+if sys.version_info[0] == 3:  # noqa
+    from unittest.mock import MagicMock, patch, PropertyMock
+else:
+    from mock import MagicMock, patch, PropertyMock
+
 from datetime import datetime
 from blocklister.main import app
 from blocklister.models import Blocklist
