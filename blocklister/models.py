@@ -1,5 +1,6 @@
 import logging
 import re
+
 from os.path import join
 from datetime import timedelta
 from ipaddress import (
@@ -7,6 +8,13 @@ from ipaddress import (
     IPv4Address,
     summarize_address_range
 )
+
+# Remove the following if python 2.7 support is omitted
+try:
+    UNICODE_EXISTS = bool(type(unicode))
+except NameError:
+    def unicode(s):
+        return str(s)
 
 from blocklister.fetcher import Fetcher
 
@@ -73,15 +81,15 @@ class Blocklist(object):
 
             if len(res.groups()) == 1:
                 if cidr_notation:
-                    entry = IPv4Network(res.groups()[0])
+                    entry = IPv4Network(unicode(res.groups()[0]))
                     results.append(entry)
                 else:
                     results.append(res.groups()[0])
 
             elif len(res.groups()) > 1:
                 if cidr_notation:
-                    start = IPv4Address(res.groups()[0])
-                    end = IPv4Address(res.groups()[1])
+                    start = IPv4Address(unicode(res.groups()[0]))
+                    end = IPv4Address(unicode(res.groups()[1]))
                     networks = list(summarize_address_range(start, end))
                     results += networks
                 else:

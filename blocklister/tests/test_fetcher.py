@@ -1,5 +1,11 @@
+import sys
 import unittest
-from unittest.mock import MagicMock, patch
+
+if sys.version_info[0] == 3:  # noqa
+    from unittest.mock import MagicMock, patch
+else:
+    from mock import MagicMock, patch
+
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 from io import BytesIO
