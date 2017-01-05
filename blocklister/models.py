@@ -113,7 +113,7 @@ class Blocklist(object):
         :returns Class instance for which we were looking for
         """
         for subcls in cls.__subclasses__():
-            if subcls.__name__ == name.title():
+            if subcls.__name__.lower() == name.lower():
                 return subcls(store)
         raise ValueError("No class found for {}".format(name))
 
@@ -243,4 +243,14 @@ class Blocklistde_Ftp(Blocklist):
 
 class Blocklistde_Strongips(Blocklist):
     source = "http://lists.blocklist.de/lists/strongips.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+
+
+class AbuseCHZeus(Blocklist):
+    source = "https://zeustracker.abuse.ch/blocklist.php?download=badips"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+
+
+class AbuseCHRansomeware(Blocklist):
+    source = "http://ransomwaretracker.abuse.ch/downloads/RW_IPBL.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"

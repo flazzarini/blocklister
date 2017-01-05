@@ -39,6 +39,8 @@ from blocklister.models import (
     Blocklistde_Apache,
     Blocklistde_Ftp,
     Blocklistde_Strongips,
+    AbuseCHZeus,
+    AbuseCHRansomeware,
 )
 
 
@@ -1243,6 +1245,122 @@ class TestBlocklistde_Strongips(TestBlocklistBase):
             IPv4Network(u'2.2.2.2/32'),
         ]
         result = self.blde.get_ips(cidr_notation=True)
+        if sys.version_info[0] == 3:  # noqa
+            self.assertCountEqual(result, expected)
+        else:
+            self.assertItemsEqual(result, expected)
+
+
+class TestAbuseCHZeus(TestBlocklistBase):
+    def setUp(self):
+        super(TestAbuseCHZeus, self).setUp()
+        self.zeus = AbuseCHZeus(self.store, filename=self.filename)
+
+    def test_get_ips(self):
+        contents = dedent(
+            """
+            #######################################
+            # abuse.ch ZeuS IP blocklist "BadIPs" #
+            #                                     #
+            # For questions please refer to       #
+            # https://zeustracker.abuse.ch/       #
+            #######################################
+
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            '1.1.1.1',
+            '2.2.2.2',
+        ]
+        result = self.zeus.get_ips()
+        if sys.version_info[0] == 3:  # noqa
+            self.assertCountEqual(result, expected)
+        else:
+            self.assertItemsEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            #######################################
+            # abuse.ch ZeuS IP blocklist "BadIPs" #
+            #                                     #
+            # For questions please refer to       #
+            # https://zeustracker.abuse.ch/       #
+            #######################################
+
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network(u'1.1.1.1/32'),
+            IPv4Network(u'2.2.2.2/32'),
+        ]
+        result = self.zeus.get_ips(cidr_notation=True)
+        if sys.version_info[0] == 3:  # noqa
+            self.assertCountEqual(result, expected)
+        else:
+            self.assertItemsEqual(result, expected)
+
+
+class TestAbuseCHRansomeware(TestBlocklistBase):
+    def setUp(self):
+        super(TestAbuseCHRansomeware, self).setUp()
+        self.bl = AbuseCHRansomeware(self.store, filename=self.filename)
+
+    def test_get_ips(self):
+        contents = dedent(
+            """
+            #######################################
+            # abuse.ch ZeuS IP blocklist "BadIPs" #
+            #                                     #
+            # For questions please refer to       #
+            # https://zeustracker.abuse.ch/       #
+            #######################################
+
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            '1.1.1.1',
+            '2.2.2.2',
+        ]
+        result = self.bl.get_ips()
+        if sys.version_info[0] == 3:  # noqa
+            self.assertCountEqual(result, expected)
+        else:
+            self.assertItemsEqual(result, expected)
+
+    def test_get_ips_cidr(self):
+        contents = dedent(
+            """
+            #######################################
+            # abuse.ch ZeuS IP blocklist "BadIPs" #
+            #                                     #
+            # For questions please refer to       #
+            # https://zeustracker.abuse.ch/       #
+            #######################################
+
+            1.1.1.1
+            2.2.2.2
+            """
+        )
+        self.tempfile.file.write(contents.encode('utf-8'))
+        self.tempfile.file.flush()
+        expected = [
+            IPv4Network(u'1.1.1.1/32'),
+            IPv4Network(u'2.2.2.2/32'),
+        ]
+        result = self.bl.get_ips(cidr_notation=True)
         if sys.version_info[0] == 3:  # noqa
             self.assertCountEqual(result, expected)
         else:
