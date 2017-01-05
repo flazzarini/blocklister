@@ -151,9 +151,13 @@ def get_multiple_lists():
             # Silently ignore unknown blocklist
             pass
 
+    # Make List of ips unique and sorted
+    ips = list(set(ips))
+    ips.sort()
+
     result = render_template(
         "mikrotik_addresslist.jinja2",
-        ips=list(set(ips)),
+        ips=ips,
         listname=listname,
         comment=comment)
     response = make_response(result, 200)
