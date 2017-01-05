@@ -1,3 +1,9 @@
+1.6.1
+-----
+
+* Remove duplicates when using multilist (#5)
+* Ensure sorting of IP addresses when using multilist
+
 1.6.0
 -----
 
