@@ -26,6 +26,7 @@ def develop():
     ]
     if not path.exists("env"):
         fab.local("virtualenv -p /usr/bin/python3 env")
+    fab.local("env/bin/pip install --upgrade pip setuptools")
     fab.local("env/bin/python setup.py develop")
     fab.local("env/bin/pip install {}".format(" ".join(dev_packages)))
 
