@@ -157,7 +157,7 @@ def get_multiple_lists():
 
     result = render_template(
         "mikrotik_addresslist.jinja2",
-        ips=ips,
+        ips=list(set(ips)),
         listname=listname,
         comment=comment)
     response = make_response(result, 200)
