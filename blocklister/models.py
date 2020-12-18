@@ -183,24 +183,6 @@ class Malwaredomainlist(Blocklist):
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
 
 
-class Openbl(Blocklist):
-    source = "https://www.openbl.org/lists/base.txt.gz"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-    gzip = True
-
-
-class Openbl_180(Blocklist):
-    source = "https://www.openbl.org/lists/base_180days.txt.gz"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-    gzip = True
-
-
-class Openbl_360(Blocklist):
-    source = "https://www.openbl.org/lists/base_360days.txt.gz"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-    gzip = True
-
-
 class Spamhausdrop(Blocklist):
     source = "http://www.spamhaus.org/drop/drop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
