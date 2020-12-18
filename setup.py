@@ -1,9 +1,5 @@
 from setuptools import setup, find_packages
-from pip.req import parse_requirements
 from os.path import join
-
-install_reqs = parse_requirements('requirements.txt', session=False)
-reqs = [str(ir.req) for ir in install_reqs]
 
 NAME = "blocklister"
 DESCRIPTION = "Create Mikrotik Firewall address-lists and offer them via http"
@@ -21,10 +17,28 @@ setup(
     author_email=AUTHOR_EMAIL,
     license="Private",
     include_package_data=True,
-    install_requires=reqs,
+    install_requires=[
+        "Flask==0.10.1",
+        "Flask-Limiter==0.9.1",
+        "requests >=2.9,<3.0",
+    ],
     entry_points={
         'console_scripts': [
             'blocklister-updater=blocklister.updater:run'
+        ]
+    },
+    extras_require={
+        "dev": [
+            "sphinx",
+            "sphinx-rtd-theme",
+            "uvicorn",
+        ],
+        "test": [
+            "pylint",
+            "pyroma",
+            "pytest",
+            "pytest-cov",
+            "radon",
         ]
     },
     dependency_links=[],
