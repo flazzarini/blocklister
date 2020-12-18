@@ -14,3 +14,5 @@ whitelist_ips = 127.0.0.1 \
 
 ; Activate deduplication of IPs
 deduplicate = true
+
+; vim: set filetype=dosini :
