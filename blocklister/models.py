@@ -178,11 +178,6 @@ class Dshield(Blocklist):
     gzip = True
 
 
-class Malwaredomainlist(Blocklist):
-    source = "http://www.malwaredomainlist.com/hostslist/ip.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-
-
 class Spamhausdrop(Blocklist):
     source = "http://www.spamhaus.org/drop/drop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
