@@ -18,7 +18,7 @@ setup(
     license="Private",
     include_package_data=True,
     install_requires=[
-        "Flask==0.10.1",
+        "Flask==1.0",
         "Flask-Limiter==0.9.1",
         "requests >=2.9,<3.0",
     ],
