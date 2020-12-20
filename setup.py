@@ -31,7 +31,7 @@ setup(
         "dev": [
             "sphinx",
             "sphinx-rtd-theme",
-            "uvicorn",
+            "gunicorn",
         ],
         "test": [
             "pylint",

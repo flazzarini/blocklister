@@ -224,7 +224,7 @@ def run(conn):
     package_name = get_package_name(conn)
     conn.run(
         """
-        ./env/bin/uvicorn --host 0.0.0.0 %s.main:app --reload
+        ./env/bin/gunicorn -b 0.0.0.0 %s.main:app --reload
         """ % package_name,
         pty=True,
         replace_env=False
