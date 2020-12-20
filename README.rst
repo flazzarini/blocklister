@@ -24,10 +24,6 @@ here.
 * Spider - http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy
 * Hijacked - http://list.iblocklist.com/?list=usrcshglbiilevmyfhse
 * Dshield - http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv
-* Malwaredomainlist - http://www.malwaredomainlist.com/hostslist/ip.txt
-* Openbl - https://www.openbl.org/lists/base.txt.gz
-* Openbl_180 - https://www.openbl.org/lists/base_180days.txt.gz
-* Openbl_360 - https://www.openbl.org/lists/base_360days.txt.gz
 * Spamhausdrop - https://www.spamhaus.org/drop/drop.txt
 * Spamhausedrop - https://www.spamhaus.org/drop/edrop.txt
 * Blocklistde_All - http://lists.blocklist.de/lists/all.txt
