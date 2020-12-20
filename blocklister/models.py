@@ -221,3 +221,8 @@ class Blocklistde_Ftp(Blocklist):
 class Blocklistde_Strongips(Blocklist):
     source = "http://lists.blocklist.de/lists/strongips.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+
+
+class UltimateHostsBlacklist(Blocklist):
+    source = "https://hosts.ubuntu101.co.za/ips.list"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
