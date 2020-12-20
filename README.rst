@@ -33,6 +33,7 @@ here.
 * Blocklistde_Apache - http://lists.blocklist.de/lists/apache.txt
 * Blocklistde_Ftp - http://lists.blocklist.de/lists/ftp.txt
 * Blocklistde_Strongips - http://lists.blocklist.de/lists/strongips.txt
+* Ultimate Hosts Blacklist - https://hosts.ubuntu101.co.za/ips.list
 
 
 Install
