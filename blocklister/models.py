@@ -150,6 +150,7 @@ class Level3(Blocklist):
 class Edu(Blocklist):
     source = "http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh"
     gzip = True
+    dedupe = False  # The source list is too big
 
 
 class Proxy(Blocklist):
