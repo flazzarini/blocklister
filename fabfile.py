@@ -1,5 +1,6 @@
 import re
 import sys
+import os
 from collections import namedtuple
 from datetime import datetime
 from fileinput import input as finput
@@ -65,6 +66,31 @@ def get_docker_tags(package_name: str, version: str) -> List[str]:
         ]
     )
     return targets
+
+
+def verify_pip_config(conn, executed_in_ci=False):
+    """
+    Verifies if your pip configuration contains `pypi.gefoo.org` and sets
+    credentials if executed in CI
+    """
+    # Skip this check when executed in CI, we are probably relying on
+    # Environment Variables
+    if executed_in_ci:
+        twine_env_vars = [
+            'TWINE_USERNAME',
+            'TWINE_PASSWORD',
+            'TWINE_REPOSITORY',
+        ]
+        for twine_env_var in twine_env_vars:
+            if not os.environ.get(twine_env_var):
+                print("Make sure you have %r set" % (twine_env_var))
+        return
+
+    result = conn.run("cat ~/.pypirc | grep -e \"^\[pypi.gefoo.org\]$\"")
+    if result.exited != 0:
+        raise Exception(
+            "pypi.gefoo.org repository is not configured in your ~/.pypirc")
+    return
 
 
 @task
@@ -190,9 +216,23 @@ def build_docker(conn, do_python_build=True):
         conn.run(
             "docker build "
             "--build-arg VERSION=%s "
-            "-t %s ." % (
+            "-t %s -f Dockerfile-Blocklister ." % (
                 version,
-                target
+                target,
+            )
+        )
+
+    # Separate build process for blocklister-updater
+    package_name = "blocklister-updater"
+    version = get_version(conn)
+    targets = get_docker_tags(package_name, version)
+    for target in targets:
+        conn.run(
+            "docker build "
+            "--build-arg VERSION=%s "
+            "-t %s -f Dockerfile-Updater ." % (
+                version,
+                target,
             )
         )
 
