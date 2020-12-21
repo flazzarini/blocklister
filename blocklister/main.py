@@ -1,7 +1,7 @@
 import logging
 
 from flask import Flask, request, render_template, make_response
-from flask.ext.limiter import Limiter
+from flask_limiter import Limiter
 
 from blocklister import __version__, __changelog__
 from blocklister.models import Blocklist
@@ -166,7 +166,9 @@ def get_multiple_lists():
 
 
 if __name__ == "__main__":
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
     app.debug = True
     app.run()
+
+else:
+    # Setup logging
+    logging.basicConfig(level=logging.DEBUG)

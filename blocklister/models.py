@@ -113,7 +113,7 @@ class Blocklist(object):
         :returns Class instance for which we were looking for
         """
         for subcls in cls.__subclasses__():
-            if subcls.__name__ == name.title():
+            if subcls.__name__.lower() == name.lower():
                 return subcls(store)
         raise ValueError("No class found for {}".format(name))
 
@@ -178,29 +178,6 @@ class Dshield(Blocklist):
     gzip = True
 
 
-class Malwaredomainlist(Blocklist):
-    source = "http://www.malwaredomainlist.com/hostslist/ip.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-
-
-class Openbl(Blocklist):
-    source = "https://www.openbl.org/lists/base.txt.gz"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-    gzip = True
-
-
-class Openbl_180(Blocklist):
-    source = "https://www.openbl.org/lists/base_180days.txt.gz"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-    gzip = True
-
-
-class Openbl_360(Blocklist):
-    source = "https://www.openbl.org/lists/base_360days.txt.gz"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*$"
-    gzip = True
-
-
 class Spamhausdrop(Blocklist):
     source = "http://www.spamhaus.org/drop/drop.txt"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
@@ -243,4 +220,9 @@ class Blocklistde_Ftp(Blocklist):
 
 class Blocklistde_Strongips(Blocklist):
     source = "http://lists.blocklist.de/lists/strongips.txt"
+    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+
+
+class UltimateHostsBlacklist(Blocklist):
+    source = "https://hosts.ubuntu101.co.za/ips.list"
     regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"

@@ -1,6 +1,4 @@
 import logging
-from future.standard_library import install_aliases
-install_aliases()  # noqa
 
 from configparser import ConfigParser, NoSectionError, NoOptionError
 from os.path import exists

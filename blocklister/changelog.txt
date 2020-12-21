@@ -1,3 +1,13 @@
+1.7.0
+-----
+
+* Add docker support
+* Removes `/malwaredomainlist`, no longer supported by upstream
+* Removed `/openbl`, `/openbl_180`, `/openbl_360`, no longer supported by
+  upstream
+* Added `/ultimateblacklist`
+
+
 1.6.1
 -----
 

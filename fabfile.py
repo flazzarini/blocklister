@@ -1,281 +1,279 @@
-from StringIO import StringIO
-from os import path, environ
-import fabric.api as fab
-import fabric.colors as clr
+import re
+import sys
+import os
+from collections import namedtuple
+from datetime import datetime
+from fileinput import input as finput
+from netrc import netrc
+from os import listdir
+from os.path import join
+from typing import List
 
-PYREPO_DIR = "/var/www/gefoo.org/pyrepo"
-PYREPO_URL = "https://pyrepo.gefoo.org"
-DEPLOY_DIR = "/var/www/gefoo.org/blocklister"
-PACKAGE_NAME = 'blocklister'
-USER = 'blocklister'
+from fabric import task
+from fabric.connection import Connection
 
-fab.env.roledefs = {
-    'pyrepo': ['pyrepo.gefoo.org'],
-    'prod': ['spoon.gefoo.org'],
-    'staging': ['foodtaster.lchome.net'],
-}
+Credentials = namedtuple('Credentials', 'username, password')
 
 
-@fab.task
-def develop():
+def get_package_name(conn):
+    """Return package name"""
+    result = conn.run("env/bin/python setup.py --name")
+    return result.stdout.strip("\n")
+
+
+def get_package_description(conn):
+    """Return package description"""
+    result = conn.run("env/bin/python setup.py --description")
+    return result.stdout.strip("\n")
+
+
+def get_version(conn):
+    """Returns version of the package"""
+    version_output = conn.run("./env/bin/python setup.py --version")
+    return version_output.stdout.strip("\n")
+
+
+def get_surrounding_years():
     """
-    Prepares a development environment
+    Gets the surrounding years -1 from current year and +1 from current year
     """
-    dev_packages = [
-        'pytest', 'pytest-xdist', 'pytest-pep8', 'tox', 'httpie'
+    year = datetime.now().year
+    return [year - 1, year, year + 1]
+
+
+def get_credentials(sitename: str) -> Credentials:
+    """Retrieves username and password from .netrc file"""
+    netrc_instance = netrc()
+    result = netrc_instance.authenticators(sitename)
+    if not result:
+        raise Exception("Please add your credentials to "
+                        "your ~/.netrc file for site %s" % sitename)
+
+    return Credentials(result[0], result[2])
+
+
+def get_docker_tags(package_name: str, version: str) -> List[str]:
+    """
+    Prepare docker tags to put on images
+    """
+    targets = [
+        "flazzarini/%s:latest" % package_name,
+        "flazzarini/%s:%s" % (package_name, version),
     ]
-    if not path.exists("env"):
-        fab.local("virtualenv -p /usr/bin/python3 env")
-    fab.local("env/bin/python setup.py develop")
-    fab.local("env/bin/pip install {}".format(" ".join(dev_packages)))
-
-
-@fab.task
-def test():
-    """
-    Run Py.test
-    """
-    fab.local("env/bin/py.test -f --color yes blocklister")
-
-
-@fab.roles('pyrepo')
-@fab.task
-def publish():
-    """
-    Publish package to pyrepo.gefoo.org
-    """
-    fab.local("env/bin/python setup.py sdist")
-    tar_filename = fab.local(
-        "env/bin/python setup.py --fullname", capture=True
+    targets.extend(
+        [
+            "registry.gefoo.org/%s" % (_) for _ in targets
+        ]
     )
-    dist_filename = "dist/{}.tar.gz".format(tar_filename)
-    fab.put(dist_filename, PYREPO_DIR)
+    return targets
 
 
-@fab.task
-def deploy():
+def verify_pip_config(conn, executed_in_ci=False):
     """
-    Deploy package
+    Verifies if your pip configuration contains `pypi.gefoo.org` and sets
+    credentials if executed in CI
     """
-    branch = fab.local('git rev-parse --abbrev-ref HEAD', capture=True)
+    # Skip this check when executed in CI, we are probably relying on
+    # Environment Variables
+    if executed_in_ci:
+        twine_env_vars = [
+            'TWINE_USERNAME',
+            'TWINE_PASSWORD',
+            'TWINE_REPOSITORY',
+        ]
+        for twine_env_var in twine_env_vars:
+            if not os.environ.get(twine_env_var):
+                print("Make sure you have %r set" % (twine_env_var))
+        return
 
-    if branch == "develop":
-        fab.local("env/bin/python setup.py sdist")
-        tar_filename = "{}.tar.gz".format(
-            fab.local(
-                "env/bin/python setup.py --fullname", capture=True
-            )
-        )
-        dist_filename = "dist/{}".format(tar_filename)
-        dest_filename = "/tmp/{}".format(tar_filename)
-        fab.put(dist_filename, dest_filename)
+    result = conn.run("cat ~/.pypirc | grep -e \"^\[pypi.gefoo.org\]$\"")
+    if result.exited != 0:
+        raise Exception(
+            "pypi.gefoo.org repository is not configured in your ~/.pypirc")
+    return
 
-        fab.env.user = USER
-        with fab.cd(DEPLOY_DIR):
-            fab.run(
-                "env/bin/pip uninstall --trusted-host pyrepo.gefoo.org -y {}"
-                .format(PACKAGE_NAME))
-            fab.run(
-                "env/bin/pip install --trusted-host pyrepo.gefoo.org "
-                "--upgrade {}"
-                .format(dest_filename))
 
+@task
+def build(conn):
+    """Builds python package"""
+    conn.run("./env/bin/python setup.py clean")
+    conn.run("./env/bin/python setup.py bdist bdist_wheel")
+
+
+@task
+def develop(conn):
+    """Creates development environment"""
+    conn.run("[ -d env ] || python3 -m venv env", replace_env=False)
+    conn.run("env/bin/pip install -U pip setuptools", replace_env=False)
+    conn.run("env/bin/pip install wheel", replace_env=False)
+    conn.run("env/bin/pip install -e .[test,dev]", replace_env=False)
+
+
+@task
+def publish(conn):
+    """Publish to pyrepo"""
+    verify_pip_config(conn)
+    conn.run("./env/bin/python setup.py clean")
+    conn.run("./env/bin/python setup.py bdist bdist_wheel")
+    filename = conn.run(
+        "./env/bin/python setup.py --fullname").stdout.strip("\n")
+
+    dist_file = "dist/%s-py3-none-any.whl" % (filename)
+    conn.run("./env/bin/twine upload -r pypi.gefoo.org %s" % dist_file)
+
+
+@task
+def doc(conn):
+    """Builds doc"""
+    conn.run("rm -Rf doc/_build/*")
+    conn.run("rm -Rf doc/api-doc/*.rst")
+    conn.run("find doc/ -name '*.rst' -exec touch {} \;")
+    conn.run(
+        "./env/bin/python ci/scripts/gen_api_doc.py --dest doc/api-doc",
+        pty=True)
+
+    for year in get_surrounding_years():
+        conn.run(
+            """\
+            ./env/bin/python ci/scripts/gen_weeknr_map_doc.py \
+                --dest doc/weektables-doc/weektable_{year}.rst \
+                --year {year}
+            """.format(year=year))
+    conn.run("./env/bin/sphinx-build --color -aE doc doc/_build", pty=True)
+
+
+@task
+def publish_doc(conn, username=None, password=None, branch='develop'):
+    """Publishes doc to https://docs.gefoo.org"""
+    if not username or not password:
+        credentials = get_credentials("docs.gefoo.org")
     else:
-        fab.execute("publish")
-        fab.env.user = USER
-        with fab.cd(DEPLOY_DIR):
-            fab.run("env/bin/pip install --upgrade pip")
-            fab.run("env/bin/pip install --upgrade setuptools")
-            fab.run(
-                "env/bin/pip install --trusted-host pyrepo.gefoo.org "
-                "--upgrade -f {} {}"
-                .format(PYREPO_URL, PACKAGE_NAME)
+        credentials = Credentials(username, password)
+
+    doc(conn)
+    conn.run("cd doc/_build && zip -r doc.zip *")
+    package = get_package_name(conn)
+    description = get_package_description(conn)
+
+    print("Got branch %s" % branch)
+    if branch and branch != "master":
+        version = 'develop'
+    else:
+        version = get_version(conn)
+
+    conn.run(
+        """\
+        cd doc/_build && \
+        curl -X POST \
+            --user {username}:{password} \
+            -F filedata=@doc.zip \
+            -F name="{package}" \
+            -F version="{version}" \
+            -F description="{description}" \
+            https://docs.gefoo.org/hmfd
+        """.format(username=credentials.username,
+                   password=credentials.password,
+                   package=package,
+                   version=version,
+                   description=description))
+
+
+@task
+def test(conn):
+    """Run tests"""
+    conn.run("[ -d .pytest_cache ] && rm -Rf .pytest_cache")
+    conn.run(
+        "env/bin/pytest-watch %s/ tests/ -- --lf -vv --color yes" % (
+            get_package_name(conn)
+        )
+    )
+
+
+@task
+def test_cov(conn):
+    """Run tests with coverage checks"""
+    conn.run(
+        "env/bin/py.test --cov=%s --cov-report=term" % get_package_name(conn))
+
+
+@task
+def test_covhtml(conn):
+    """Run tests with coverage checks as html report"""
+    conn.run(
+        "env/bin/py.test --cov=%s --cov-report=html" % get_package_name(conn))
+
+
+@task
+def build_docker(conn, do_python_build=True):
+    """Builds docker image"""
+    if do_python_build:
+        build(conn)
+
+    package_name = get_package_name(conn)
+    version = get_version(conn)
+    targets = get_docker_tags(package_name, version)
+    for target in targets:
+        conn.run(
+            "docker build "
+            "--build-arg VERSION=%s "
+            "-t %s -f Dockerfile-Blocklister ." % (
+                version,
+                target,
             )
-
-
-@fab.task
-def bootstrap():
-    """
-    Bootstrap environment
-    """
-    # Install system dependencies
-    deps = [
-        'apache2',
-        'libapache2-mod-wsgi',
-        'curl',
-        'gzip',
-        'python-setuptools',
-    ]
-    fab.sudo("aptitude install -q -y {0}".format(" ".join(deps)))
-    fab.sudo("easy_install virtualenv")
-
-    # Create Application User on the node
-    fab.env.warn_only = True
-    if not fab.run("cat /etc/passwd | grep \"^{}:.*$\"".format(USER)):
-        fab.sudo(
-            "useradd -d {0} -r -s /bin/sh {1}".format(DEPLOY_DIR, USER)
-        )
-        fab.sudo(
-            "install -o {0} -g {0} -d {1}".format(USER, DEPLOY_DIR)
         )
 
-    home = environ['HOME']
-    publickeyfile = "{0}/.ssh/id_rsa.pub".format(home)
-    if not path.exists(publickeyfile):
-        print clr.red(
-            "Could not continue! You need a public key on the target "
-            "machine!"
+    # Separate build process for blocklister-updater
+    package_name = "blocklister-updater"
+    version = get_version(conn)
+    targets = get_docker_tags(package_name, version)
+    for target in targets:
+        conn.run(
+            "docker build "
+            "--build-arg VERSION=%s "
+            "-t %s -f Dockerfile-Updater ." % (
+                version,
+                target,
+            )
         )
-    publickey = readfile(publickeyfile)
 
-    with fab.cd(DEPLOY_DIR):
-        fab.sudo("[ -d .ssh ] || mkdir .ssh")
-        fab.sudo("echo {0} > .ssh/authorized_keys".format(publickey))
-        fab.sudo("chown {0}.{0} .ssh -R".format(USER))
-        fab.sudo("install -o {0} -g {1} -d log".format("www-data", USER))
-        fab.sudo("install -o {0} -g {0} -d conf".format(USER, USER))
-        fab.sudo("install -o {0} -g {0} -d wsgi".format(USER, USER))
 
-    # Create Apache config files
-    apache_content = apache_template(
-        PACKAGE_NAME,
-        DEPLOY_DIR,
-        USER,
-        servername="{}.gefoo.org".format(PACKAGE_NAME)
+@task
+def build_and_upload_docker(conn):
+    """Builds all docker test images and uploads them"""
+    build_docker(conn)
+
+    package_name = get_package_name(conn)
+    version = get_version(conn)
+    targets = get_docker_tags(package_name, version)
+    for target in targets:
+        if "registry.gefoo.org" in target:
+            conn.run("docker push %s" % target)
+
+    # Separate build process for blocklister-updater
+    package_name = "blocklister-updater"
+    version = get_version(conn)
+    targets = get_docker_tags(package_name, version)
+    for target in targets:
+        if "registry.gefoo.org" in target:
+            conn.run("docker push %s" % target)
+
+@task
+def build_changelog(conn, filename="CHANGELOG.md"):
+    """Parses the CHANGELOG.md and adds a link for each issue id"""
+    issue_links = get_changelog_links(filename=filename)
+    clean_changelog_links(filename=filename)
+    append_changelog_links(filename=filename, links_entries=issue_links)
+
+
+@task
+def run(conn):
+    """Run application with gunicorn"""
+    package_name = get_package_name(conn)
+    conn.run(
+        """
+        ./env/bin/gunicorn -b 0.0.0.0 %s.main:app --reload
+        """ % package_name,
+        pty=True,
+        replace_env=False
     )
-    apache_filename = (
-        "/etc/apache2/sites-available/{}.conf".format(PACKAGE_NAME)
-    )
-    fab.put(StringIO(apache_content), apache_filename, use_sudo=True)
 
-    fab.env.user = USER
-    with fab.cd(DEPLOY_DIR):
-        fab.run("virtualenv env")
-
-        # Create config files
-        apache_content = apache_template(
-            PACKAGE_NAME,
-            DEPLOY_DIR,
-            USER,
-            servername="{}.gefoo.org".format(PACKAGE_NAME)
-        )
-        apache_filename = (
-            "/etc/apache2/sites-available/{}.conf".format(PACKAGE_NAME)
-        )
-
-        wsgi_content = wsgi_template(
-            PACKAGE_NAME,
-            DEPLOY_DIR,
-        )
-        wsgi_filename = "{0}/wsgi/{1}.wsgi".format(DEPLOY_DIR, PACKAGE_NAME)
-
-        logging_content = logging_template()
-        logging_filename = "{0}/logging.ini".format(DEPLOY_DIR)
-
-        fab.put(StringIO(wsgi_content), wsgi_filename)
-        fab.put(StringIO(logging_content), logging_filename)
-
-
-@fab.task
-def unbootstrap():
-    """
-    Remove bootstrap
-    """
-    fab.sudo("rm -Rf {0}".format(DEPLOY_DIR))
-    fab.sudo("userdel {0}".format(USER))
-
-
-def readfile(filename):
-    if path.exists(filename):
-        return open(filename, "r").read().strip()
-
-
-def wsgi_template(appname, path, logging_level="INFO"):
-    """
-    Returns a wsgi configuration based on this template
-    """
-    template = (
-        'import os\n'
-        'import logging\n'
-        'import logging.config\n'
-        '\n'
-        'activate_this = "{path}/env/bin/activate_this.py"\n'
-        'execfile(activate_this, dict(__file__=activate_this))\n'
-        '\n'
-        'logging.basicConfig(level=logging.{logging_level})\n'
-        'logging.config.fileConfig("{path}/logging.ini")\n'
-        '\n'
-        'from {app}.main import app as application\n'
-        .format(
-            app=appname,
-            app_up=appname.upper(),
-            path=path,
-            logging_level=logging_level
-        )
-    )
-    return template
-
-
-def logging_template():
-    """
-    Returns a logging configuration based on this template
-    """
-    template = (
-        '[loggers]\n'
-        'keys=root\n'
-        '\n'
-        '[handlers]\n'
-        'keys=consoleHandler\n'
-        '\n'
-        '[formatters]\n'
-        'keys=simpleFormatter\n'
-        '\n'
-        '[logger_root]\n'
-        'level=DEBUG\n'
-        'handlers=consoleHandler\n'
-        '\n'
-        '[handler_consoleHandler]\n'
-        'class=StreamHandler\n'
-        'level=DEBUG\n'
-        'formatter=simpleFormatter\n'
-        'args=(sys.stdout,)\n'
-        '\n'
-        '[formatter_simpleFormatter]\n'
-        'format=%(asctime)s - %(name)s - %(levelname)s - %(message)s\n'
-        'datefmt=\n')
-    return template
-
-
-def apache_template(app, path, user, servername=None):
-    template = (
-        '<VirtualHost *:80>\n'
-        '    ServerName {servername}\n'
-        '    \n'
-        '    WSGIDaemonProcess {app} user={user} group={user} threads=5\n'
-        '    WSGIScriptAlias / {path}/wsgi/{app}.wsgi\n'
-        '    \n'
-        '    <Directory {path}>\n'
-        '        WSGIProcessGroup {app}\n'
-        '        WSGIApplicationGroup %{{GLOBAL}}\n'
-        '        Order deny,allow\n'
-        '        Allow from all\n'
-        '    </Directory>\n'
-        '    \n'
-        '    # Log Files\n'
-        '    LogLevel warn\n'
-        '    CustomLog {path}/log/access.log combined\n'
-        '    ErrorLog  {path}/log/error.log\n'
-        '</VirtualHost>\n'
-
-    )
-    if not servername:
-        servername = fab.prompt(
-            "What will be the apache servername?",
-            default="app.local.net"
-        )
-    return template.format(
-        app=app,
-        path=path,
-        servername=servername,
-        user=user
-    )

@@ -1,0 +1,20 @@
+<VirtualHost *:80>
+    ServerAdmin admin@blocklister.local.domain
+    ServerName blocklister.local.domain
+    ServerAlias blocklister
+
+    WSGIDaemonProcess blocklister user=blocklister group=blocklister threads=5
+    WSGIScriptAlias / /var/www/blocklister/wsgi/blocklister.wsgi
+
+    <Directory /var/www/blocklister>
+        WSGIProcessGroup blocklister
+        WSGIApplicationGroup %{GLOBAL}
+        Order deny,allow
+        Allow from all
+    </Directory>
+
+    # Log Files
+    LogLevel warn
+    CustomLog /var/www/blocklister/logs/access.log combined
+    ErrorLog  /var/www/blocklister/logs/error.log
+</VirtualHost>
