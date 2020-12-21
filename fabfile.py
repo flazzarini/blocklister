@@ -249,6 +249,13 @@ def build_and_upload_docker(conn):
         if "registry.gefoo.org" in target:
             conn.run("docker push %s" % target)
 
+    # Separate build process for blocklister-updater
+    package_name = "blocklister-updater"
+    version = get_version(conn)
+    targets = get_docker_tags(package_name, version)
+    for target in targets:
+        if "registry.gefoo.org" in target:
+            conn.run("docker push %s" % target)
 
 @task
 def build_changelog(conn, filename="CHANGELOG.md"):
