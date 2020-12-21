@@ -1,3 +1,13 @@
+1.7.2
+-----
+
+* Upgrade flask to >=1.0.0
+
+1.7.1
+-----
+
+* Fixes `/level1-2-3` routes (no longer doing deduplication)
+
 1.7.0
 -----
 
