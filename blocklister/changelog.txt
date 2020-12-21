@@ -1,3 +1,8 @@
+1.7.4
+-----
+
+* Disable deduplication on `/edu`
+
 1.7.3
 -----
 
