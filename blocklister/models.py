@@ -29,6 +29,7 @@ class Blocklist(object):
         "(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
     template = "firewall_addresslist.jinja2"
     gzip = False
+    dedupe = True
 
     def __init__(self, store, filename=None, refresh_list=timedelta(days=2)):
         self.name = self.__class__.__name__.lower()
@@ -131,16 +132,19 @@ class Spyware(Blocklist):
 class Level1(Blocklist):
     source = "http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw"
     gzip = True
+    dedupe = False  # The source list is too big
 
 
 class Level2(Blocklist):
     source = "http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw"
     gzip = True
+    dedupe = False  # The source list is too big
 
 
 class Level3(Blocklist):
     source = "http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh"
     gzip = True
+    dedupe = False  # The source list is too big
 
 
 class Edu(Blocklist):
