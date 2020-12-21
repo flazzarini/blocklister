@@ -110,7 +110,7 @@ def get_list(blacklist):
         raise EmptyListError("No ips found for %s" % blacklist.title())
 
     # If deduplicating, process
-    if dedupe:
+    if dedupe and bl.dedupe:
         smr = Summerizer(ips)
         ips = smr.summary()
 
