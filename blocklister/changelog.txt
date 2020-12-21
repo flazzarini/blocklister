@@ -1,3 +1,10 @@
+1.7.0
+-----
+
+* Add docker support
+* Removed non-working Lists malewaredomain/blocklist.org
+
+
 1.6.1
 -----
 
