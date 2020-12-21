@@ -8,10 +8,7 @@ ENV PKG=blocklister-${VERSION}-py3-none-any.whl
 COPY dist/${PKG} /tmp/
 RUN apk add \
     python3-dev \
-    openssl \
-    alpine-sdk \
-    musl-dev \
-    libffi-dev
+    openssl
 RUN pip3 install -U pip
 RUN pip3 install /tmp/${PKG}
 RUN pip3 install gunicorn
