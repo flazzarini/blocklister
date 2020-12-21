@@ -166,7 +166,9 @@ def get_multiple_lists():
 
 
 if __name__ == "__main__":
-    import logging
-    logging.basicConfig(level=logging.DEBUG)
     app.debug = True
     app.run()
+
+else:
+    # Setup logging
+    logging.basicConfig(level=logging.DEBUG)
