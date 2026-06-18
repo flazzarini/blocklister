@@ -1,20 +1,14 @@
 import logging
 import re
-
-from os.path import join
+from dataclasses import dataclass
 from datetime import timedelta
 from ipaddress import (
-    IPv4Network,
     IPv4Address,
-    summarize_address_range
+    IPv4Network,
+    summarize_address_range,
 )
-
-# Remove the following if python 2.7 support is omitted
-try:
-    UNICODE_EXISTS = bool(type(unicode))
-except NameError:
-    def unicode(s):
-        return str(s)
+from pathlib import Path
+from typing import ClassVar
 
 from blocklister.fetcher import Fetcher
 
@@ -22,37 +16,53 @@ from blocklister.fetcher import Fetcher
 LOG = logging.getLogger(__name__)
 
 
-class Blocklist(object):
-    source = "http://bogus.site.com"
-    regex = (
-        "^.*:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})-"
-        "(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
-    template = "firewall_addresslist.jinja2"
-    gzip = False
-    dedupe = True
+@dataclass(init=False)
+class Blocklist:
+    SOURCE: ClassVar[str] = "http://bogus.site.com"
+    REGEX: ClassVar[re.Pattern] = re.compile(
+        r"^.*:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})-"
+        r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    )
+    TEMPLATE: ClassVar[str] = "firewall_addresslist.jinja2"
+    GZIP: ClassVar[bool] = False
+    DEDUPE: ClassVar[bool] = True
 
-    def __init__(self, store, filename=None, refresh_list=timedelta(days=2)):
-        self.name = self.__class__.__name__.lower()
+    store: str | Path
+    refresh_list: timedelta
+    filename: str | None
+
+    def __init__(
+        self,
+        store: str | Path = "/tmp",
+        filename: str | None = None,
+        refresh_list: timedelta = timedelta(days=2),
+    ):
         self.store = store
         self.filename = filename
         self.refresh_list = refresh_list
-        self.fetcher = Fetcher(
-            self.source, self.filepath, refresh=self.refresh_list)
 
-    def __repr__(self):
-        return (
-            "{0}({1}, filename={2})".format(
-                self.__class__.__name__, self.store, self.filename))
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.store}, filename={self.filename})"
 
     @property
-    def filepath(self):
+    def name(self) -> str:
+        return self.__class__.__name__.lower()
+
+    @property
+    def fetcher(self):
+        return Fetcher(
+            self.SOURCE,
+            self.filepath,
+            refresh=self.refresh_list,
+        )
+
+    @property
+    def filepath(self) -> Path:
         """
         Compiles the absolute filepath to the local data source for this List
         """
-        _filename = self.filename
-        if not _filename:
-            _filename = self.name + '.txt'
-        return join(self.store, _filename)
+        filename = self.filename if self.filename is not None else f"{self.name}.txt"
+        return Path(self.store) / filename
 
     def get_ips(self, cidr_notation=False):
         """
@@ -71,8 +81,13 @@ class Blocklist(object):
         linenr = 1
         filehandler = open(self.filepath, 'r')
         for line in filehandler:
-            res = re.search(self.regex, line)
+            if not line.strip():
+                continue
 
+            if line.startswith("#"):
+                continue
+
+            res = re.search(self.REGEX, line)
             if not res:
                 LOG.debug(
                     "{} Line:{} Regular Expression mismatch {}"
@@ -82,15 +97,15 @@ class Blocklist(object):
 
             if len(res.groups()) == 1:
                 if cidr_notation:
-                    entry = IPv4Network(unicode(res.groups()[0]))
+                    entry = IPv4Network(res.groups()[0])
                     results.append(entry)
                 else:
                     results.append(res.groups()[0])
 
             elif len(res.groups()) > 1:
                 if cidr_notation:
-                    start = IPv4Address(unicode(res.groups()[0]))
-                    end = IPv4Address(unicode(res.groups()[1]))
+                    start = IPv4Address(res.groups()[0])
+                    end = IPv4Address(res.groups()[1])
                     networks = list(summarize_address_range(start, end))
                     results += networks
                 else:
@@ -120,114 +135,114 @@ class Blocklist(object):
 
 
 class Ads(Blocklist):
-    source = "http://list.iblocklist.com/?list=bt_ads"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=bt_ads"
+    GZIP = True
 
 
 class Spyware(Blocklist):
-    source = "http://list.iblocklist.com/?list=bt_spyware"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=bt_spyware"
+    GZIP = True
 
 
 class Level1(Blocklist):
-    source = "http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw"
-    gzip = True
-    dedupe = False  # The source list is too big
+    SOURCE = "http://list.iblocklist.com/?list=ydxerpxkpcfqjaybcssw"
+    GZIP = True
+    DEDUPE = False  # The source list is too big
 
 
 class Level2(Blocklist):
-    source = "http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw"
-    gzip = True
-    dedupe = False  # The source list is too big
+    SOURCE = "http://list.iblocklist.com/?list=gyisgnzbhppbvsphucsw"
+    GZIP = True
+    DEDUPE = False  # The source list is too big
 
 
 class Level3(Blocklist):
-    source = "http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh"
-    gzip = True
-    dedupe = False  # The source list is too big
+    SOURCE = "http://list.iblocklist.com/?list=uwnukjqktoggdknzrhgh"
+    GZIP = True
+    DEDUPE = False  # The source list is too big
 
 
 class Edu(Blocklist):
-    source = "http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh"
-    gzip = True
-    dedupe = False  # The source list is too big
+    SOURCE = "http://list.iblocklist.com/?list=imlmncgrkbnacgcwfjvh"
+    GZIP = True
+    DEDUPE = False  # The source list is too big
 
 
 class Proxy(Blocklist):
-    source = "http://list.iblocklist.com/?list=xoebmbyexwuiogmbyprb"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=xoebmbyexwuiogmbyprb"
+    GZIP = True
 
 
 class Badpeers(Blocklist):
-    source = "http://list.iblocklist.com/?list=cwworuawihqvocglcoss"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=cwworuawihqvocglcoss"
+    GZIP = True
 
 
 class Microsoft(Blocklist):
-    source = "http://list.iblocklist.com/?list=xshktygkujudfnjfioro"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=xshktygkujudfnjfioro"
+    GZIP = True
 
 
 class Spider(Blocklist):
-    source = "http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=mcvxsnihddgutbjfbghy"
+    GZIP = True
 
 
 class Hijacked(Blocklist):
-    source = "http://list.iblocklist.com/?list=usrcshglbiilevmyfhse"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=usrcshglbiilevmyfhse"
+    GZIP = True
 
 
 class Dshield(Blocklist):
-    source = "http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv"
-    gzip = True
+    SOURCE = "http://list.iblocklist.com/?list=xpbqleszmajjesnzddhv"
+    GZIP = True
 
 
 class Spamhausdrop(Blocklist):
-    source = "http://www.spamhaus.org/drop/drop.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
+    SOURCE = "http://www.spamhaus.org/drop/drop.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$")
 
 
 class Spamhausedrop(Blocklist):
-    source = "http://www.spamhaus.org/drop/edrop.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$"
+    SOURCE = "http://www.spamhaus.org/drop/edrop.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d{1,2})\s;\sSBL.*.*$")
 
 
 class Blocklistde_All(Blocklist):
-    source = "http://lists.blocklist.de/lists/all.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/all.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class Blocklistde_Ssh(Blocklist):
-    source = "http://lists.blocklist.de/lists/ssh.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/ssh.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class Blocklistde_Mail(Blocklist):
-    source = "http://lists.blocklist.de/lists/mail.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/mail.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class Blocklistde_Imap(Blocklist):
-    source = "http://lists.blocklist.de/lists/imap.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/imap.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class Blocklistde_Apache(Blocklist):
-    source = "http://lists.blocklist.de/lists/apache.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/apache.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class Blocklistde_Ftp(Blocklist):
-    source = "http://lists.blocklist.de/lists/ftp.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/ftp.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class Blocklistde_Strongips(Blocklist):
-    source = "http://lists.blocklist.de/lists/strongips.txt"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "http://lists.blocklist.de/lists/strongips.txt"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")
 
 
 class UltimateHostsBlacklist(Blocklist):
-    source = "https://hosts.ubuntu101.co.za/ips.list"
-    regex = "^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$"
+    SOURCE = "https://hosts.ubuntu101.co.za/ips.list"
+    REGEX = re.compile(r"^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$")

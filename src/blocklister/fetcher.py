@@ -118,7 +118,7 @@ class Fetcher(object):
         :rtype `blocklister.fetcher.Resource`
         """
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=10)
         except IOError as exc:
             raise FetcherException(exc)
 
