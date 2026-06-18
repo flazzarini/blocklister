@@ -1,0 +1,23 @@
+---
+
+version: '3'
+
+tasks:
+  develop:
+    desc: Creates development environment
+    env:
+      UV_LINK_MODE: copy
+    cmds:
+      - uv pip install -e .[test,dev]
+
+  test:
+    desc: Run tests
+    deps:
+      - develop
+    cmds:
+      - uv run pytest
+
+  run-dev:
+    desc: Run development server
+    cmds:
+      - uv run flask --app src/blocklister/main.py --debug run

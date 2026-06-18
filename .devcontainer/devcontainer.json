@@ -1,0 +1,14 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/python:3.14-trixie",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": "false"
+		}
+	},
+	"postCreateCommand": "bash -c .devcontainer/init.bash",
+	"customizations": {
+		"vscode": {
+			"extensions": []
+		}
+	}
+}

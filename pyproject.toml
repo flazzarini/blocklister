@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "blocklister"
+version = "1.7.4"
+dependencies = [
+  "Flask",
+  "Flask-Limiter",
+  "requests",
+]
+requires-python = ">=3.11"
+authors = [
+  {name = "Frank Lazzarini", email = "flazzarini@gmail.com"},
+]
+description = "Create Mikrotik Firewall address-lists and offer them via http"
+readme = "README.rst"
+classifiers = [
+  "Programming Language :: Python"
+]
+
+[project.optional-dependencies]
+dev = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "gunicorn",
+]
+test = [
+  "pylint",
+  "pyroma",
+  "pytest",
+  "pytest-cov",
+  "pytest-watch",
+  "radon",
+]
+
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/blocklister/",
+]
+exclude = []
+
+[project.scripts]
+blocklister-updater = "blocklister.updater:run"

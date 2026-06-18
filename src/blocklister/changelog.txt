@@ -1,0 +1,118 @@
+1.7.4
+-----
+
+* Disable deduplication on `/edu`
+
+1.7.3
+-----
+
+* Reduces size of Docker image
+
+1.7.2
+-----
+
+* Upgrade flask to >=1.0.0
+
+1.7.1
+-----
+
+* Fixes `/level1-2-3` routes (no longer doing deduplication)
+
+1.7.0
+-----
+
+* Add docker support
+* Removes `/malwaredomainlist`, no longer supported by upstream
+* Removed `/openbl`, `/openbl_180`, `/openbl_360`, no longer supported by
+  upstream
+* Added `/ultimateblacklist`
+
+
+1.6.1
+-----
+
+* Remove duplicates when using multilist (#5)
+* Ensure sorting of IP addresses when using multilist
+
+1.6.0
+-----
+
+* Made blocklister python 2.7 compatible again
+
+1.5.0
+-----
+
+* Added `cidr` query parameter to render lists using CIDR notation
+
+1.4.0
+-----
+
+* Added `/multilist` feature
+* Handle Requests Exceptions correctly for `blocklister-updater`
+
+1.3.1
+-----
+
+* Missing changelog changes
+* Order list of supported lists
+* Use http links for spamhaus
+
+1.3.0
+-----
+
+* Using requests now
+
+1.2.1
+-----
+
+* Cache problems
+
+1.2
+---
+
+* Simplified get_ips method
+* Added OpenBL and Spamhaus lists
+* Added changelog
+
+
+1.1
+---
+
+* Added Cache for list routes
+
+
+1.0.5
+-----
+
+* Content-Type should be text/plain
+
+
+1.0.4
+-----
+
+* Fabric install task should always try a pip --upgrade
+
+
+1.0.3
+-----
+
+* Malwaredomainlist was not working, different regex
+
+
+1.0.2
+-----
+
+* Error in curl example on welcome page
+
+
+1.0.1
+-----
+
+* New Welcome page
+* Remove duplicate ip entries
+
+
+1.0
+---
+
+* First production ready version
